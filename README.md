@@ -74,7 +74,7 @@ We welcome contributions to improve **Tourvesta Web**! Here's how you can contri
    ```
 3. Commit your changes and push the branch.
    ```bash
-   git commit -m "Add a feature"
+   git commit -m "Add feature"
    git push origin feature-name
    ```
 4. Open a pull request and describe your changes.
