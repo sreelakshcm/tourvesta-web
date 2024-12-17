@@ -33,17 +33,27 @@ export type Tour = {
 
 export type User = {
   _id: string;
-  username: string;
+  name: string;
   email: string;
   role: 'admin' | 'user' | 'guide' | 'lead-guide';
   password: string;
   active: boolean;
 };
 
+export type CurrentUser = {
+  id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'user' | 'guide' | 'lead-guide';
+  exp: number;
+  iat: number;
+};
+
 export type Review = {
-  _id: string;
+  id: string;
   review: string;
   rating: number;
   tour: string;
   user: { name: string };
+  createdAt?: string;
 };

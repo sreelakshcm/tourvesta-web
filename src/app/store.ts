@@ -1,8 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { apiReducer } from './api';
+import { apiSlice } from './api';
 import toursReducer from '@features/tours/tourSlice';
 import themeReducer from '@features/UI/themeToggleSlice';
 import navbarReducer from '@features/UI/navbarSlice';
+import navigationReducer from '@features/UI/navigationSlice';
 import authReducer from '@features/auth/authSlice';
 import { setupListeners } from '@reduxjs/toolkit/query';
 import {
@@ -30,14 +31,15 @@ export const store = configureStore({
     theme: themeReducer,
     navbar:navbarReducer,
     auth: persistedAuthReducer,
-    [apiReducer.reducerPath]: apiReducer.reducer,
+    navigation: navigationReducer,
+    [apiSlice.reducerPath]: apiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(apiReducer.middleware),
+    }).concat(apiSlice.middleware),
 });
 
 setupListeners(store.dispatch);

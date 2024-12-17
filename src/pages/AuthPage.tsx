@@ -1,24 +1,105 @@
+import { FC, useState } from 'react';
+import { useForm, Controller, SubmitHandler } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as Yup from 'yup';
 import RenderAbstractBg from '@components/common/RenderAbstractBg';
 import ButtonComponent from '@components/UI/Button';
 import Input from '@components/UI/inputComponent';
-import PasswordInput from '@components/UI/inputComponent/Password';
 import { Mail01Icon } from 'hugeicons-react';
-import { FC, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ThemeToggle from '@components/UI/ThemeToggleButton';
 import RenderLogo from '@components/common/RenderLogo';
 import { DEFAULT_INPUT_CLASSNAMES, SECONDARY_COLOR } from '@constants/styles';
+import PasswordInput from '@components/UI/inputComponent/Password';
+import { AuthFormType } from 'types/form';
+import { useLoginMutation, useSignUpMutation } from '@features/auth/authApi';
+import { SignUpPayload } from 'types/api';
+import Loader from '@components/UI/Loader';
+import { useAppDispatch } from '@app/hooks';
+import { getUserDetails, setToken } from '@features/auth/authSlice';
+import {
+  setSuccess,
+} from '@features/UI/themeToggleSlice';
+import Alert from '@components/UI/Alert';
 
 const AuthPage: FC = () => {
   const [isSignup, setIsSignup] = useState(false);
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const [signUp, { isLoading: isSignupLoading, isError, error }] =
+    useSignUpMutation();
+  const [login, { isLoading: isLoginLoding }] = useLoginMutation();
 
   const toggleForm = (): void => setIsSignup((prev) => !prev);
+
+  // Yup validation schema
+  const authValidationSchema = Yup.object({
+    name: isSignup
+      ? Yup.string().required('Name is required')
+      : Yup.string().notRequired(),
+    email: Yup.string()
+      .email('Invalid Email Address')
+      .required('Email is required'),
+    password: Yup.string()
+      .min(8, 'Password must be at least 6 characters')
+      .required('Password is required'),
+    passwordConfirm: isSignup
+      ? Yup.string()
+        .oneOf([Yup.ref('password')], 'Passwords must match')
+        .required('Confirm Password is required')
+      : Yup.string().notRequired(),
+  });
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(authValidationSchema),
+  });
+
+  const onSubmit: SubmitHandler<AuthFormType> = async (data) => {
+    if (isSignup) {
+      const signupPayload: SignUpPayload = {
+        name: data.name as string,
+        email: data.email,
+        password: data.password,
+        passwordConfirm: data.passwordConfirm as string,
+      };
+      const { token } = await signUp(signupPayload).unwrap();
+
+      setIsSignup(false);
+      dispatch(setToken(token));
+      dispatch(
+        setSuccess({
+          isSuccess: true,
+          successMessage: 'User registered successfully!',
+        }),
+      );
+    } else {
+      const credentials = {
+        email: data.email,
+        password: data.password,
+      };
+      await login(credentials).unwrap();
+    }
+    reset();
+    dispatch(getUserDetails());
+    navigate('/');
+  };
+
+  if (isLoginLoding || isSignupLoading) return <Loader />;
+
+  if (isError) return <Alert message={JSON.stringify(error)} type="error" />;
 
   return (
     <div
       className="relative flex min-h-screen items-center justify-center
         bg-backgroundLight text-fontLight dark:bg-backgroundDark dark:text-fontDark"
     >
+     
       {/* Background & Theme Toggle */}
       <RenderAbstractBg />
       <div className="absolute right-4 top-4 z-20">
@@ -43,30 +124,80 @@ const AuthPage: FC = () => {
         </h2>
 
         {/* Form Fields */}
-        <form className="space-y-6">
+        <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+          {/* Name Input */}
+          {isSignup && (
+            <Controller
+              name="name"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  id="name"
+                  placeholder="Name"
+                  className={DEFAULT_INPUT_CLASSNAMES}
+                />
+              )}
+            />
+          )}
+          {errors.name && (
+            <p className="text-sm text-red-500">{errors.name?.message}</p>
+          )}
+
           {/* Email Input */}
-          <Input
-            type="email"
-            id="email"
-            placeholder="Email"
-            className={DEFAULT_INPUT_CLASSNAMES}
-            suffix={<Mail01Icon size={20} color={SECONDARY_COLOR} />}
+          <Controller
+            name="email"
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                id="email"
+                placeholder="Email"
+                className={DEFAULT_INPUT_CLASSNAMES}
+                suffix={<Mail01Icon size={20} color={SECONDARY_COLOR} />}
+              />
+            )}
           />
+          {errors.email && (
+            <p className="text-sm text-red-500">{errors.email?.message}</p>
+          )}
 
           {/* Password Input */}
-          <PasswordInput
-            id="password"
-            placeholder="Password"
-            className={DEFAULT_INPUT_CLASSNAMES}
+          <Controller
+            name="password"
+            control={control}
+            render={({ field }) => (
+              <PasswordInput
+                {...field}
+                id="password"
+                placeholder="Password"
+                className={DEFAULT_INPUT_CLASSNAMES}
+              />
+            )}
           />
+          {errors.password && (
+            <p className="text-sm text-red-500">{errors.password?.message}</p>
+          )}
 
           {/* Confirm Password (only for Sign Up) */}
           {isSignup && (
-            <PasswordInput
-              id="confirmPassword"
-              placeholder="Confirm Password"
-              className={DEFAULT_INPUT_CLASSNAMES}
+            <Controller
+              name="passwordConfirm"
+              control={control}
+              render={({ field }) => (
+                <PasswordInput
+                  {...field}
+                  id="passwordConfirm"
+                  placeholder="Confirm Password"
+                  className={DEFAULT_INPUT_CLASSNAMES}
+                />
+              )}
             />
+          )}
+          {isSignup && errors.passwordConfirm && (
+            <p className="text-sm text-red-500">
+              {errors.passwordConfirm?.message}
+            </p>
           )}
 
           {/* Submit Button */}

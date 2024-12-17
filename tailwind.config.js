@@ -43,6 +43,7 @@ export default {
           hover: 'rgba(74, 189, 172, 0.8)',
           active: 'rgba(74, 189, 172, 0.75)',
           focus: 'rgba(74, 189, 172, 0.95)',
+          extraLight: 'rgba(74, 189, 172, 0.2)',
         },
         // Secondary color with opacity variations
         secondary: {

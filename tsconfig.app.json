@@ -44,6 +44,12 @@
       "@app/*": [
         "app/*"
       ],
+      "@utils/*": [
+        "utils/*"
+      ],
+      "@assets/*": [
+        "assets/*"
+      ],
       "types/*": [
         "types/*"
       ],

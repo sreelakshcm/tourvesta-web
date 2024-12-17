@@ -7,7 +7,7 @@ const NoResults: FC = () => {
 
   return (
     <div
-      className="relative flex h-full w-full items-center justify-center overflow-hidden"
+      className="relative z-0 flex h-full w-full items-center justify-center overflow-hidden"
     >
       <div className="z-10 space-y-8">
         {/* Illustration */}
