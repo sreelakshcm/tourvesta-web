@@ -52,7 +52,7 @@ sm:text-sm lg:text-base">
           ))}
         </div>
       ) : (
-        <NoData />
+        <NoData label='Review'/>
       )}
     </div>
   );

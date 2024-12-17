@@ -8,7 +8,11 @@ import {
 } from '@reduxjs/toolkit/query/react';
 import { RootState } from './store';
 import { logout, setToken } from '@features/auth/authSlice';
-import { clearAlertErrorState, setAlertError, setError } from '@features/UI/themeToggleSlice';
+import {
+  clearAlertErrorState,
+  setAlertError,
+  setError,
+} from '@features/UI/themeToggleSlice';
 import { ApiErrorResponse } from 'types/api';
 import { setNavigateTo } from '@features/UI/navigationSlice';
 
@@ -38,6 +42,7 @@ const baseQueryWithReauth: BaseQueryFn<
       api.dispatch(clearAlertErrorState());
       api.dispatch(setNavigateTo('/network-error'));
     } else if (errData.status === 403) {
+      api.dispatch(clearAlertErrorState());
       const refreshResult = await baseQuery(
         `${AUTH}/refresh`,
         api,
@@ -54,12 +59,6 @@ const baseQueryWithReauth: BaseQueryFn<
         }
         api.dispatch(logout());
         api.dispatch(
-          setAlertError({
-            isError: true,
-            errorMessage: 'Your token has expired. Please Login again!',
-          }),
-        );
-        api.dispatch(
           setError({
             isError: true,
             errorMessage: 'Your token has expired. Please Login again!',
@@ -69,7 +68,14 @@ const baseQueryWithReauth: BaseQueryFn<
         return refreshResult;
       }
     } else {
-      api.dispatch(clearAlertErrorState());
+      errData.status !== 401 &&
+        errData.status !== 500 &&
+        api.dispatch(
+          setAlertError({
+            isError: true,
+            errorMessage: errData?.data?.message || '',
+          }),
+        );
       api.dispatch(
         setError({
           isError: true,

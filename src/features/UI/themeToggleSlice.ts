@@ -51,8 +51,6 @@ const themeSlice = createSlice({
       state.isError = action.payload.isError;
       state.errorMessage = action.payload.errorMessage;
       state.errorStatus = action.payload.status;
-      state.alertMessage = null;
-      state.alertType = null;
     },
     setAlertError: (
       state,
@@ -64,7 +62,7 @@ const themeSlice = createSlice({
       state.isSuccess = false;
       state.successMessage = null;
       state.alertMessage = action.payload.errorMessage;
-      state.alertType = state.isError ? 'error' : 'success';
+      state.alertType = 'error';
     },
     setSuccess: (
       state,

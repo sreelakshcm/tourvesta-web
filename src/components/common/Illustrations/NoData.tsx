@@ -4,6 +4,7 @@ import { selectTheme } from '@features/UI/themeToggleSlice';
 import { FC } from 'react';
 
 interface NoDataProps {
+  label?: string;
   buttonText?: string;
   onButtonClick?: () => void;
 }
@@ -11,6 +12,7 @@ interface NoDataProps {
 const NoData: FC<NoDataProps> = ({
   buttonText = 'Add Review',
   onButtonClick,
+  label,
 }) => {
   const theme = useAppSelector(selectTheme);
 
@@ -29,7 +31,7 @@ const NoData: FC<NoDataProps> = ({
         {/* Main Message */}
         <p className="text-center text-xl font-bold text-gray-700
  dark:text-gray-300 sm:text-2xl md:text-4xl">
-          Oops! Nothing here.
+          {label? `Oops! No ${label} Found!`: 'Oops! Nothing here.'}
         </p>
         <p className="text-center text-sm font-medium text-gray-600
  dark:text-gray-400 sm:text-base md:text-lg">

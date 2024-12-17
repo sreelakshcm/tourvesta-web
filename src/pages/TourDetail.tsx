@@ -18,28 +18,35 @@ import TourReviews from '@features/tours/components/TourReviews';
 import TourMap from '@features/tours/components/TourMap';
 import ItineraryTimeline from '@features/tours/components/ItineraryTimeline';
 import TourHighlightItem from '@features/tours/components/TourHighlightItem';
-import { useAppDispatch } from '@app/hooks';
+import { useAppDispatch, useAppSelector } from '@app/hooks';
 import { setIsSearch, setSearchQuery } from '@features/UI/navbarSlice';
+import NoData from '@components/common/Illustrations/NoData';
+import { getErrors } from '@features/UI/themeToggleSlice';
+import UnauthorizedPage from '@components/common/Illustrations/UnAuthorizedPage';
 
 const TourDetailPage: React.FC = () => {
   const { id = '' } = useParams<{ id: string }>();
-  const { data: tour, isLoading } = useGetTourByIdQuery(id);
+  const { data: tour, isLoading, isFetching } = useGetTourByIdQuery(id);
+  const globalError = useAppSelector(getErrors);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
     dispatch(setSearchQuery(''));
   }, [dispatch]);
-  
+
   useEffect(() => {
     dispatch(setIsSearch(null));
   }, [dispatch]);
 
   if (isLoading) return <Loader />;
 
-  if (!tour)
-    return (
-      <p className="text-center text-lg text-gray-500">Oops! Tour not found.</p>
-    );
+  if (
+    globalError.isError &&
+    (globalError.errorStatus === 401 || globalError.errorStatus === 500)
+  )
+    return <UnauthorizedPage />;
+
+  if (!tour && (!isLoading || !isFetching)) return <NoData label="Tour" />;
 
   const {
     name,
@@ -56,7 +63,7 @@ const TourDetailPage: React.FC = () => {
     description,
     locations,
     reviews,
-  } = tour;
+  } = tour || {};
 
   return (
     <div className="mt-2 bg-gray-50 pb-3 dark:bg-backgroundDark dark:text-gray-100">
@@ -117,11 +124,11 @@ const TourDetailPage: React.FC = () => {
               />
               <TourHighlightItem
                 icon={<PinIcon />}
-                label={`${startLocation.description}`}
+                label={`${startLocation?.description}`}
               />
               <TourHighlightItem
                 icon={<Location01Icon />}
-                label={`Locations - ${locations.length}`}
+                label={`Locations - ${locations?.length}`}
               />
               <TourHighlightItem
                 icon={<StarIcon />}
@@ -181,7 +188,7 @@ transition-shadow hover:shadow-lg dark:bg-neutral-dark"
                   <div className="ml-4">
                     <h3 className="text-lg font-semibold">Location</h3>
                     <p className="text-gray-600 dark:text-gray-300">
-                      {startLocation.description}
+                      {startLocation?.description}
                     </p>
                   </div>
                 </div>
@@ -193,16 +200,16 @@ transition-shadow hover:shadow-lg dark:bg-neutral-dark"
         <section className="grid grid-cols-1 gap-12 lg:grid-cols-2">
           <div>
             <h2 className="text-2xl font-bold">Itinerary</h2>
-            <ItineraryTimeline locations={locations} />
+            <ItineraryTimeline locations={locations || []} />
           </div>
 
           <div>
             <h2 className="text-2xl font-bold">Locations</h2>
-            <TourMap locations={locations} />
+            <TourMap locations={locations || []} />
           </div>
         </section>
 
-        <GallerySection images={images} />
+        <GallerySection images={images || []} />
 
         <TourReviews reviews={reviews} />
       </div>
