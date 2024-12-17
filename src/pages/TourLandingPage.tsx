@@ -9,16 +9,29 @@ import {
   setIsSearch,
   setSearchQuery,
 } from '@features/UI/navbarSlice';
-import { setError } from '@features/UI/themeToggleSlice';
-import { FilterIcon, FilterRemoveIcon } from 'hugeicons-react';
-import NoResults from './NoResults';
+import {
+  getErrors,
+  setAlertError,
+  setError,
+} from '@features/UI/themeToggleSlice';
+import NoResults from '@components/common/Illustrations/NoResults';
+import UnauthorizedPage from '@components/common/Illustrations/UnAuthorizedPage';
+import { ApiErrorResponse } from 'types/api';
+import TourFilters from '@features/tours/components/TourFilters';
+import ToursHeader from '@features/tours/components/ToursHeader';
 
 const TourLandingPage: React.FC = () => {
   const tours = useAppSelector((state) => state.tours.tours);
+  const globalError = useAppSelector(getErrors);
   const searchQuery = useAppSelector(getSearchQuery);
-  const { isError, isLoading, data, error } = useGetAllToursQuery('', {
-    refetchOnReconnect: true,
-  });
+  const {
+    isError, isLoading, isFetching, data, error, 
+  } = useGetAllToursQuery(
+    '',
+    {
+      refetchOnReconnect: true,
+    },
+  );
   const dispatch = useAppDispatch();
 
   const [filters, setFilters] = useState<{
@@ -36,22 +49,34 @@ const TourLandingPage: React.FC = () => {
 
   useEffect(() => {
     if (data) dispatch(setTours(data));
+    else dispatch(setTours([]));
   }, [dispatch, data]);
 
   useEffect(() => {
-    if (isError) {
-      dispatch(
-        setError({
-          errorMessage: 'Failed to fetch Tours',
-          isError,
-        }),
-      );
+    const fetchError = error as ApiErrorResponse;
+
+    if (fetchError?.status !== 403) {
+      if (isError) {
+        dispatch(
+          setError({
+            errorMessage: fetchError?.data?.message || null,
+            isError,
+            status: +fetchError?.status || 200,
+          }),
+        );
+        dispatch(
+          setAlertError({
+            errorMessage: fetchError?.data?.message || null,
+            isError,
+          }),
+        );
+      }
     }
   }, [dispatch, error, isError]);
 
   // Apply search and filters only when apply button is clicked
   const applyFilters = (): void => {
-    let filtered = [...tours];
+    let filtered = tours.length ? [...tours] : [...(data || [])];
 
     // Filter by difficulty
     if (filters.difficulty) {
@@ -67,15 +92,6 @@ const TourLandingPage: React.FC = () => {
           filters.priceRange !== null &&
           tour.price >= filters.priceRange[0] &&
           tour.price <= filters.priceRange[1],
-      );
-    }
-
-    // Apply search query after filtering
-    if (searchQuery) {
-      filtered = filtered.filter(
-        (tour) =>
-          tour.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          tour.summary.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
 
@@ -98,10 +114,9 @@ const TourLandingPage: React.FC = () => {
     setFilters({ difficulty: '', priceRange: null });
   }, [searchQuery, tours]);
 
-  // Reset search query when the component mounts or on any changes
   useEffect(() => {
     dispatch(setSearchQuery(''));
-  }, [dispatch]);
+  }, [dispatch, isFilterOpen]);
 
   const handleFilterChange = (
     e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>,
@@ -129,118 +144,32 @@ const TourLandingPage: React.FC = () => {
     dispatch(setIsSearch('tours'));
   }, [dispatch]);
 
-  if (isLoading) return <Loader />;
+  if (isLoading || isFetching) return <Loader />;
 
   return (
     <>
-      <header className="p-6 text-center">
-        <h1 className="text-4xl font-bold text-primary">
-          Explore Our Exciting Tours
-        </h1>
-        <p className="mt-4 text-xl dark:text-mutedDark">
-          Discover the most stunning destinations across the world
-        </p>
-      </header>
-
-      {/* Filter Icon */}
-      <div className="mb-4 flex justify-end gap-3">
-        {(filters.difficulty || filters.priceRange) && (
-          <button
-            onClick={resetFilters}
-            className="inline-flex items-center gap-2 rounded-lg bg-secondary p-2 text-white 
-shadow-md hover:bg-secondary-hover focus:outline-none focus:ring-2 focus:ring-secondary 
-focus:ring-opacity-50"
-          >
-            <FilterRemoveIcon className="h-6 w-6" />
-          </button>
-        )}
-        <button
-          onClick={toggleFilters}
-          className="inline-flex items-center gap-2 rounded-lg bg-primary p-2 text-white shadow-md
- hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50"
-        >
-          <FilterIcon className="h-6 w-6" />
-        </button>
-      </div>
-
-      {/* Dropdown for Filters */}
-      {isFilterOpen && (
-        <div
-          className="absolute right-4  z-10 w-72 rounded-lg bg-white shadow-md
- dark:bg-neutral-layout"
-        >
-          <div className="p-4">
-            {/* Difficulty Filter */}
-            <div className="mb-4">
-              <label
-                htmlFor="difficulty"
-                className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
-              >
-                Difficulty
-              </label>
-              <select
-                name="difficulty"
-                id="difficulty"
-                value={filters.difficulty}
-                onChange={handleFilterChange}
-                className="w-full rounded-lg border-gray-300 p-2 text-gray-800 shadow-sm
- focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-zinc-900 dark:text-gray-200"
-              >
-                <option value="">All Difficulty Levels</option>
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="difficult">Difficult</option>
-              </select>
-            </div>
-
-            {/* Price Range Filter */}
-            <div className="mb-4">
-              <label
-                htmlFor="price"
-                className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
-              >
-                Price Range
-              </label>
-              <select
-                name="price"
-                id="price"
-                value={filters.priceRange?.join(',') || ''}
-                onChange={handleFilterChange}
-                className="w-full rounded-lg border-gray-300 p-2 text-gray-800 shadow-sm
- focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-zinc-900 dark:text-gray-200"
-              >
-                <option value="">All Price Ranges</option>
-                <option value="100,200">$100 - $200</option>
-                <option value="200,400">$200 - $400</option>
-                <option value="400,600">$400 - $600</option>
-              </select>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex justify-end gap-4">
-              <button
-                onClick={resetFilters}
-                className="rounded-lg bg-secondary px-4 py-2 text-white shadow 
-hover:bg-secondary-hover focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-opacity-50"
-              >
-                Reset
-              </button>
-              <button
-                onClick={applyFilters}
-                className="rounded-lg bg-primary px-4 py-2 text-white shadow
- hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50"
-              >
-                Apply
-              </button>
-            </div>
-          </div>
-        </div>
+      {tours?.length !== 0 && (
+        <>
+          <ToursHeader />
+          <TourFilters
+            applyFilters={applyFilters}
+            filters={filters}
+            handleFilterChange={handleFilterChange}
+            isFilterOpen={isFilterOpen}
+            resetFilters={resetFilters}
+            toggleFilters={toggleFilters}
+          />
+        </>
       )}
+
       {searchQuery && filteredTours.length === 0 ? (
         <NoResults />
       ) : (
         <TourCard tours={filteredTours} />
       )}
+      {globalError.isError &&
+        (globalError.errorStatus === 401 ||
+          globalError.errorStatus === 500) && <UnauthorizedPage />}
     </>
   );
 };

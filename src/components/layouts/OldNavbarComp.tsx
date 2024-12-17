@@ -12,10 +12,12 @@ import { selectTheme } from '@features/UI/themeToggleSlice';
 import { REVIEWS } from '@constants/services';
 import { getAllTourData } from '@features/tours/tourActions';
 import { isSearch } from '@features/UI/navbarSlice';
+import { getToken } from '@features/auth/authSlice';
 
 const Navbar: FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const token = useAppSelector(getToken);
   const isRenderSearch = useAppSelector(isSearch);
   const theme = useAppSelector(selectTheme);
   const tours = useAppSelector(getAllTourData);
@@ -106,14 +108,17 @@ py-2 shadow-md dark:bg-neutral-layout"
         {/* Navigation Links and Log In Button for Desktop */}
         <div className="hidden md:flex md:items-center md:space-x-6">
           <NavigationLinks />
-          <Link
-            to="/auth"
-            className="rounded-md bg-primary px-4 py-2 text-sm font-semibold
+          {!token && (
+            <Link
+              to="/auth"
+              className="rounded-md bg-primary px-4 py-2 text-sm font-semibold
  text-white hover:bg-primary-hover"
-          >
-            Log In
-          </Link>
+            >
+              Log In
+            </Link>
+          )}
         </div>
+
         <div className="ml-4 hidden items-center space-x-4 md:flex">
           <ThemeToggle />
         </div>
@@ -155,13 +160,15 @@ shadow-lg dark:bg-neutral-dark"
         >
           <div className="flex flex-col items-center space-y-4">
             <NavigationLinks />
-            <Link
-              to="/auth"
-              className="rounded-md bg-primary px-4 py-2 text-sm 
+            {!token && (
+              <Link
+                to="/auth"
+                className="rounded-md bg-primary px-4 py-2 text-sm 
 font-semibold text-white hover:bg-primary-hover"
-            >
-              Log In
-            </Link>
+              >
+                Log In
+              </Link>
+            )}
             <ThemeToggle />
           </div>
         </div>

@@ -9,7 +9,7 @@ const TourReviews: FC<{ reviews?: Review[] }> = ({ reviews }) => {
       <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {reviews?.map((review) => (
           <div
-            key={review._id}
+            key={review.id}
             className="flex flex-col rounded-xl bg-white p-6 shadow-lg 
 transition-shadow hover:shadow-xl dark:bg-neutral-dark"
           >
@@ -48,7 +48,6 @@ bg-gray-200 text-lg font-bold text-gray-500 dark:bg-gray-700 dark:text-gray-300"
                 : review.review}
               {review.review.length > 150 && (
                 <span className="cursor-pointer font-medium text-primary">
-                  {' '}
                   Read more
                 </span>
               )}

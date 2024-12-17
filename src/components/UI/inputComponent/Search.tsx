@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@app/hooks';
 import { NEUTRAL_DEFAULT } from '@constants/styles';
-import { setSearchQuery } from '@features/UI/navbarSlice';
+import { getSearchQuery, setSearchQuery } from '@features/UI/navbarSlice';
 import { selectTheme } from '@features/UI/themeToggleSlice';
 import { Cancel01Icon, Search02Icon } from 'hugeicons-react';
 
@@ -19,6 +19,7 @@ const SearchBar = <T extends { name: string }>({
   data = [],
   ...props
 }: SearchBarProps<T>): JSX.Element => {
+  const searchQuery = useAppSelector(getSearchQuery);
   const [value, setValue] = useState('');
   const [filteredSuggestions, setFilteredSuggestions] = useState<T[]>([]);
   const dispatch = useAppDispatch();
@@ -33,6 +34,10 @@ const SearchBar = <T extends { name: string }>({
       clearTimeout(handler); // Cleanup the timeout on every re-render
     };
   }, [value, dispatch]);
+
+  useEffect(() => {
+    if (searchQuery === '') setValue('');
+  }, [searchQuery]);
 
   const handleInputChange = (
     event: React.ChangeEvent<HTMLInputElement>,

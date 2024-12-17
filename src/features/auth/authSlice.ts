@@ -1,10 +1,11 @@
+import { RootState } from '@app/store';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { jwtDecode } from 'jwt-decode';
-import { User } from 'types/tourTypes';
+import { CurrentUser } from 'types/tourTypes';
 
 interface AuthState {
   token: string | null;
-  user: Omit<User, 'role'> | null;
+  user: CurrentUser | null;
 }
 
 const initialState: AuthState = {
@@ -16,12 +17,11 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    loginSuccess: (
-      state,
-      action: PayloadAction<{ token: string; }>,
-    ) => {
-      state.token = action.payload.token;
-      state.user = jwtDecode(action.payload.token);
+    setToken: (state, action: PayloadAction<string>) => {
+      state.token = action.payload;
+    },
+    getUserDetails: (state) => {
+      state.user = state.token ? jwtDecode(state.token) : null;
     },
     logout: (state) => {
       state.token = null;
@@ -30,6 +30,9 @@ const authSlice = createSlice({
   },
 });
 
-export const { loginSuccess, logout } = authSlice.actions;
+export const { setToken, logout, getUserDetails } = authSlice.actions;
+
+export const getToken = (state: RootState): string | null => state.auth.token;
+export const getUserData = (state: RootState): CurrentUser | null => state.auth.user;
 
 export default authSlice.reducer;

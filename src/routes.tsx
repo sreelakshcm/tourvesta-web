@@ -6,9 +6,11 @@ const TourLandingPage = React.lazy(() => import('./pages/TourLandingPage'));
 const TourDetailPage = React.lazy(() => import('./pages/TourDetail'));
 const UserLayout = React.lazy(() => import('@components/layouts/UserLayout'));
 const UserReviews = React.lazy(() => import('@pages/UserReviews'));
+const UserSettings = React.lazy(() => import('@pages/UserSettings'));
 const AuthPage = React.lazy(() => import('@pages/AuthPage'));
 const ForgotPasswordPage = React.lazy(() => import('./pages/ForgotPassword'));
-const NotFoundPage = React.lazy(() => import('./pages/404NotFound'));
+const NotFoundPage = React.lazy(() => import('@components/common/Illustrations/404NotFound'));
+const NetworkErrorPage = React.lazy(() => import('@components/common/Illustrations/NetworkError'));
 
 export const routes: RouteObject[] = [
   {
@@ -31,6 +33,10 @@ export const routes: RouteObject[] = [
         path: 'reviews',
         element: <UserReviews />,
       },
+      {
+        path: 'settings',
+        element: <UserSettings />,
+      },
     ],
   },
   {
@@ -40,6 +46,10 @@ export const routes: RouteObject[] = [
   {
     path: '/forgot-password',
     element: <ForgotPasswordPage />,
+  },
+  {
+    path: '/network-error',
+    element: <NetworkErrorPage />,
   },
   {
     path: '*', // Catch-all for unmatched routes
