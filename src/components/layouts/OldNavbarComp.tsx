@@ -8,11 +8,11 @@ import ThemeToggle from '@components/UI/ThemeToggleButton';
 import RenderLogo from '@components/common/RenderLogo';
 import { DEFAULT_INPUT_CLASSNAMES } from '@constants/styles';
 import { useAppSelector } from '@app/hooks';
-import { selectTheme } from '@features/UI/themeToggleSlice';
+import { selectTheme } from '@actions/themeToggleAction';
 import { REVIEWS } from '@constants/services';
-import { getAllTourData } from '@features/tours/tourActions';
-import { isSearch } from '@features/UI/navbarSlice';
-import { getToken } from '@features/auth/authSlice';
+import { getAllTourData } from '@actions/tourActions';
+import { isSearch } from '@slices/navbarSlice';
+import { getToken } from '@slices/authSlice';
 
 const Navbar: FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

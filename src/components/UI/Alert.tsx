@@ -2,7 +2,7 @@ import { useAppDispatch } from '@app/hooks';
 import {
   clearAlertErrorState,
   clearSuccessState,
-} from '@features/UI/themeToggleSlice';
+} from '@slices/themeToggleSlice';
 import {
   AlertCircleIcon,
   Cancel02Icon,

@@ -2,8 +2,8 @@ import { useAppSelector } from '@app/hooks';
 import StarSvg from '@assets/svg/StarSvg';
 import NoData from '@components/common/Illustrations/NoData';
 import Loader from '@components/UI/Loader';
-import { getUserData } from '@features/auth/authSlice';
-import { useGetReviewByUserIdQuery } from '@features/reviews/reviewsApi';
+import { getUserData } from '@slices/authSlice';
+import { useGetReviewByUserIdQuery } from '@services/reviewsApi';
 import { FC } from 'react';
 
 const Reviews: FC = () => {

@@ -1,6 +1,6 @@
 import { useAppSelector } from '@app/hooks';
 import { TOURS } from '@constants/services';
-import { selectTheme } from '@features/UI/themeToggleSlice';
+import { selectTheme } from '@actions/themeToggleAction';
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
 

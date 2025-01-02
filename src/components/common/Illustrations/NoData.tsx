@@ -1,6 +1,6 @@
 import { useAppSelector } from '@app/hooks';
 import ButtonComponent from '@components/UI/Button';
-import { selectTheme } from '@features/UI/themeToggleSlice';
+import { selectTheme } from '@actions/themeToggleAction';
 import { FC } from 'react';
 
 interface NoDataProps {

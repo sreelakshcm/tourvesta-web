@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@app/hooks';
 import { NEUTRAL_DEFAULT } from '@constants/styles';
-import { getSearchQuery, setSearchQuery } from '@features/UI/navbarSlice';
-import { selectTheme } from '@features/UI/themeToggleSlice';
+import { getSearchQuery, setSearchQuery } from '@slices/navbarSlice';
+import { selectTheme } from '@actions/themeToggleAction';
 import { Cancel01Icon, Search02Icon } from 'hugeicons-react';
 
 type SearchBarProps<T> = Omit<

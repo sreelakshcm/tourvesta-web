@@ -11,7 +11,7 @@ import {
   DollarSquareIcon,
   Location01Icon,
 } from 'hugeicons-react';
-import { useGetTourByIdQuery } from '@features/tours/tourApi';
+import { useGetTourByIdQuery } from '@services/tourApi';
 import Loader from '@components/UI/Loader';
 import GallerySection from '@components/common/Gallery';
 import TourReviews from '@features/tours/components/TourReviews';
@@ -19,9 +19,9 @@ import TourMap from '@features/tours/components/TourMap';
 import ItineraryTimeline from '@features/tours/components/ItineraryTimeline';
 import TourHighlightItem from '@features/tours/components/TourHighlightItem';
 import { useAppDispatch, useAppSelector } from '@app/hooks';
-import { setIsSearch, setSearchQuery } from '@features/UI/navbarSlice';
+import { setIsSearch, setSearchQuery } from '@slices/navbarSlice';
 import NoData from '@components/common/Illustrations/NoData';
-import { getErrors } from '@features/UI/themeToggleSlice';
+import { getErrors } from '@actions/themeToggleAction';
 import UnauthorizedPage from '@components/common/Illustrations/UnAuthorizedPage';
 
 const TourDetailPage: React.FC = () => {

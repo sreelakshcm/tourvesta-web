@@ -1,7 +1,8 @@
 import { FC, useState } from 'react';
 import { Moon02Icon, Sun02Icon } from 'hugeicons-react';
 import { useAppDispatch, useAppSelector } from '@app/hooks';
-import { selectTheme,  toggleTheme } from '@features/UI/themeToggleSlice';
+import { selectTheme } from '@actions/themeToggleAction';
+import { toggleTheme } from '@slices/themeToggleSlice';
 
 const ThemeToggle: FC = () => {
   const theme = useAppSelector(selectTheme);

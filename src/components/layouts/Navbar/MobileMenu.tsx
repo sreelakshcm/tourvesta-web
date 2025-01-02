@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import ThemeToggle from '@components/UI/ThemeToggleButton';
 import NavigationLinks from './NavigationLinks';
 
@@ -8,6 +8,7 @@ interface MobileMenuProps {
   token: string | null;
   userName?: string;
   logOut: () => void;
+  navigateToSettings: () => void,
 }
 
 const MobileMenu: FC<MobileMenuProps> = ({
@@ -15,8 +16,8 @@ const MobileMenu: FC<MobileMenuProps> = ({
   token,
   userName,
   logOut,
+  navigateToSettings,
 }) => {
-  const navigate = useNavigate();
 
   return (
     <div
@@ -40,10 +41,7 @@ py-6 shadow-lg dark:bg-neutral-dark"
 
         {/* Greeting */}
         <div
-          onClick={() => {
-            navigate('/settings');
-            closeMenu();
-          }}
+          onClick={navigateToSettings}
           className="text-center text-sm text-gray-800 dark:text-gray-200"
         >
           <p className="font-semibold">
@@ -75,7 +73,7 @@ py-6 shadow-lg dark:bg-neutral-dark"
           <div className="w-full space-y-2">
             <button
               className="w-full rounded-md px-4 py-2 text-sm transition hover:text-primary-hover"
-              onClick={() => console.log('Update Password clicked')}
+              onClick={navigateToSettings}
             >
               Update Password
             </button>

@@ -6,8 +6,8 @@ import {
   LoginPayload,
   SignUpPayload,
 } from 'types/api';
-import { logout, setToken } from './authSlice';
-import { setSuccess } from '@features/UI/themeToggleSlice';
+import { setSuccess } from '@slices/themeToggleSlice';
+import { logout, setToken } from '@slices/authSlice';
 
 export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({

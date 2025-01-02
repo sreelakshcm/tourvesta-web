@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { useAppSelector } from '@app/hooks';
-import { getIsLoading } from '@features/UI/themeToggleSlice';
+import { getIsLoading } from '@actions/themeToggleAction';
 import Loader from '@components/UI/Loader';
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';

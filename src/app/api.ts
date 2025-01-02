@@ -7,14 +7,14 @@ import {
   FetchBaseQueryError,
 } from '@reduxjs/toolkit/query/react';
 import { RootState } from './store';
-import { logout, setToken } from '@features/auth/authSlice';
+import { logout, setToken } from '@slices/authSlice';
 import {
   clearAlertErrorState,
   setAlertError,
   setError,
-} from '@features/UI/themeToggleSlice';
+} from '@slices/themeToggleSlice';
 import { ApiErrorResponse } from 'types/api';
-import { setNavigateTo } from '@features/UI/navigationSlice';
+import { setNavigateTo } from '@slices/navigationSlice';
 
 const baseQuery = fetchBaseQuery({
   baseUrl: SERVICE_BASE_URL,

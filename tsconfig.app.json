@@ -50,6 +50,18 @@
       "@assets/*": [
         "assets/*"
       ],
+      "@schema/*": [
+        "schema/*"
+      ],
+      "@services/*": [
+        "app/services/*"
+      ],
+      "@slices/*": [
+        "app/slices/*"
+      ],
+      "@actions/*": [
+        "app/actions/*"
+      ],
       "types/*": [
         "types/*"
       ],

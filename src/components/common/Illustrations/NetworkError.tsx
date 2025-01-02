@@ -1,5 +1,5 @@
 import { useAppSelector } from '@app/hooks';
-import { selectTheme } from '@features/UI/themeToggleSlice';
+import { selectTheme } from '@actions/themeToggleAction';
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
 

@@ -6,15 +6,16 @@ import MobileMenu from './MobileMenu';
 import NavigationLinks from './NavigationLinks';
 import ThemeToggle from '@components/UI/ThemeToggleButton';
 import { useAppDispatch, useAppSelector } from '@app/hooks';
-import { selectTheme, setSuccess } from '@features/UI/themeToggleSlice';
-import { getToken, getUserData } from '@features/auth/authSlice';
-import { isSearch } from '@features/UI/navbarSlice';
-import { getAllTourData } from '@features/tours/tourActions';
+import { setSuccess } from '@slices/themeToggleSlice';
+import { getToken, getUserData } from '@slices/authSlice';
+import { isSearch } from '@slices/navbarSlice';
+import { getAllTourData } from '@actions/tourActions';
 import { setupClickOutsideListener } from '@utils/clickOutsideHandler';
 import { Link, useNavigate } from 'react-router-dom';
-import { useSendLogoutMutation } from '@features/auth/authApi';
 import Loader from '@components/UI/Loader';
 import { AUTH } from '@constants/services';
+import { selectTheme } from '@actions/themeToggleAction';
+import { useSendLogoutMutation } from '@services/authApi';
 
 const Navbar: FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -64,6 +65,11 @@ const Navbar: FC = () => {
         successMessage: 'Logged out successfully!',
       }),
     );
+  };
+
+  const navigateToSettings = (): void => {
+    navigate('/settings');
+    setIsUserSettingsMenuOpen(false);
   };
 
   if (isLoading) return <Loader />;
@@ -116,10 +122,7 @@ shadow-lg transition-transform duration-300 ease-in-out dark:bg-neutral-dark"
                 >
                   {/* Dropdown Header */}
                   <div
-                    onClick={() => {
-                      navigate('/settings');
-                      setIsUserSettingsMenuOpen(false);
-                    }}
+                    onClick={navigateToSettings}
                     className="cursor-pointer border-b border-gray-200 px-4 py-3 text-sm
                      text-gray-800 dark:border-gray-700 dark:text-gray-200"
                   >
@@ -134,7 +137,7 @@ shadow-lg transition-transform duration-300 ease-in-out dark:bg-neutral-dark"
                   <button
                     className="w-full px-4 py-2 text-left text-sm text-gray-700 transition-colors
  hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-neutral-700"
-                    onClick={() => console.log('Update Password clicked')}
+                    onClick={navigateToSettings}
                   >
                     Update Password
                   </button>
@@ -212,6 +215,7 @@ shadow-lg transition-transform duration-300 ease-in-out dark:bg-neutral-dark"
             token={token}
             userName={userDetails?.name}
             logOut={logOut}
+            navigateToSettings={navigateToSettings}
           />
         </div>
       )}

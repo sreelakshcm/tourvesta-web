@@ -4,7 +4,7 @@ import { routes } from './routes';
 import '@styles/loader.css';
 import Loader from '@components/UI/Loader';
 import { useAppSelector } from '@app/hooks';
-import { getAlertErrors, getSuccess } from '@features/UI/themeToggleSlice';
+import { getAlertErrors, getSuccess } from '@actions/themeToggleAction';
 import Alert from '@components/UI/Alert';
 
 function App(): JSX.Element {

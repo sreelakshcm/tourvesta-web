@@ -1,10 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { apiSlice } from './api';
-import toursReducer from '@features/tours/tourSlice';
-import themeReducer from '@features/UI/themeToggleSlice';
-import navbarReducer from '@features/UI/navbarSlice';
-import navigationReducer from '@features/UI/navigationSlice';
-import authReducer from '@features/auth/authSlice';
+import toursReducer from '@slices/tourSlice';
+import themeReducer from '@slices/themeToggleSlice';
+import navbarReducer from '@slices/navbarSlice';
+import navigationReducer from '@slices/navigationSlice';
+import authReducer from '@slices/authSlice';
 import { setupListeners } from '@reduxjs/toolkit/query';
 import {
   persistStore,

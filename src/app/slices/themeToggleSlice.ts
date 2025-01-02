@@ -1,5 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { RootState } from '@app/store';
+import {  createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface ThemeState {
   theme: 'light' | 'dark';
@@ -104,42 +103,5 @@ export const {
   clearAlertErrorState,
   setAlertError,
 } = themeSlice.actions;
-
-export const selectTheme = (state: RootState): 'light' | 'dark' =>
-  state.theme.theme;
-
-export const getIsLoading = (state: RootState): boolean => state.theme.loading;
-
-export const getErrors = (
-  state: RootState,
-): {
-  isError: boolean;
-  errorMessage: string | null;
-  errorStatus: number;
-} => ({
-  isError: state.theme.isError,
-  errorMessage: state.theme.errorMessage,
-  errorStatus: state.theme.errorStatus,
-});
-
-export const getAlertErrors = (
-  state: RootState,
-): {
-  isError: boolean;
-  errorMessage: string | null;
-} => ({
-  isError: state.theme.alertType === 'error',
-  errorMessage: state.theme.alertMessage,
-});
-
-export const getSuccess = (
-  state: RootState,
-): {
-  isSuccess: boolean;
-  successMessage: string | null;
-} => ({
-  isSuccess: state.theme.isSuccess,
-  successMessage: state.theme.successMessage,
-});
 
 export default themeSlice.reducer;

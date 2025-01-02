@@ -8,7 +8,7 @@ const NumberInput: React.FC<NumberInputProps> = ({ label, className = '', ...pro
   <div className="flex flex-col">
     {label && <label className="mb-2 text-sm font-medium">{label}</label>}
     <input
-      className={`w-full rounded-md border border-neutral bg-backgroundLight px-4 py-2 
+      className={`w-full rounded-md border bg-backgroundLight px-4 py-2 
         focus:outline-none focus:ring-1 focus:ring-primary-focus ${className}`}
       type="number"
       {...props}

@@ -20,6 +20,10 @@ export default defineConfig({
       '@styles': path.join(__dirname, './src/styles'),
       '@utils': path.join(__dirname, './src/utils'),
       '@assets': path.join(__dirname, './src/assets'),
+      '@schema': path.join(__dirname, './src/schema'),
+      '@services': path.join(__dirname, './src/app/services'),
+      '@slices': path.join(__dirname, './src/app/slices'),
+      '@actions': path.join(__dirname, './src/app/actions'),
     },
   },
 });

@@ -12,15 +12,15 @@ import RenderLogo from '@components/common/RenderLogo';
 import { DEFAULT_INPUT_CLASSNAMES, SECONDARY_COLOR } from '@constants/styles';
 import PasswordInput from '@components/UI/inputComponent/Password';
 import { AuthFormType } from 'types/form';
-import { useLoginMutation, useSignUpMutation } from '@features/auth/authApi';
 import { SignUpPayload } from 'types/api';
 import Loader from '@components/UI/Loader';
 import { useAppDispatch } from '@app/hooks';
-import { getUserDetails, setToken } from '@features/auth/authSlice';
+import { getUserDetails, setToken } from '@slices/authSlice';
 import {
   setSuccess,
-} from '@features/UI/themeToggleSlice';
+} from '@slices/themeToggleSlice';
 import Alert from '@components/UI/Alert';
+import { useLoginMutation, useSignUpMutation } from '@app/services/authApi';
 
 const AuthPage: FC = () => {
   const [isSignup, setIsSignup] = useState(false);
