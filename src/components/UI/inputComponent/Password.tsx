@@ -12,7 +12,7 @@ type PasswordInputProps = Omit<
 };
 
 const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
-  ({ label, className = '', value, ...props }, ref) => {
+  ({ label, name, className = '', value, ...props }, ref) => {
     const [inputType, setInputType] = useState('password');
 
     const handleTogglePassword = (): void => {
@@ -31,6 +31,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
  py-2 focus:outline-none focus:ring-1 focus:ring-primary-focus ${className}`}
             type={inputType}
             value={value ?? ''}
+            autoComplete={name}
             {...props}
           />
           <button

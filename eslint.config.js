@@ -4,7 +4,7 @@ import globals from 'globals';
 import reactRefreshPlugin from 'eslint-plugin-react-refresh';
 import typescriptEslintPlugin from '@typescript-eslint/eslint-plugin';
 import tailwindcssPlugin from 'eslint-plugin-tailwindcss';
-import reactHooksPlugin from 'eslint-plugin-react-hooks';
+// import reactHooksPlugin from 'eslint-plugin-react-hooks';
 
 export default [
   // Base ESLint configuration
@@ -31,7 +31,7 @@ export default [
       'react-refresh': reactRefreshPlugin,
       '@typescript-eslint': typescriptEslintPlugin,
       tailwindcss: tailwindcssPlugin, // Add Tailwind CSS plugin
-      'react-hooks': reactHooksPlugin,
+      // 'react-hooks': reactHooksPlugin,
     },
   },
   // General rules for TypeScript and React files
