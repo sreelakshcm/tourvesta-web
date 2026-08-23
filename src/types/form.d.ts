@@ -3,4 +3,5 @@ export type AuthFormType = {
   email: string;
   password: string;
   passwordConfirm?: string | null;
+  image?: File | null;
 };

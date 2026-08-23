@@ -29,6 +29,7 @@ export type SignUpPayload = {
   email: string;
   password: string;
   passwordConfirm: string;
+  invitationToken?: string;
 };
 
 export type LoginPayload = Pick<SignUpPayload, 'email' | 'password'>;

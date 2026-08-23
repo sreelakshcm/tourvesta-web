@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
@@ -6,25 +6,33 @@ import RenderAbstractBg from '@components/common/RenderAbstractBg';
 import ButtonComponent from '@components/UI/Button';
 import Input from '@components/UI/inputComponent';
 import { Mail01Icon } from 'hugeicons-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import ThemeToggle from '@components/UI/ThemeToggleButton';
 import RenderLogo from '@components/common/RenderLogo';
 import { DEFAULT_INPUT_CLASSNAMES, SECONDARY_COLOR } from '@constants/styles';
 import PasswordInput from '@components/UI/inputComponent/Password';
 import { AuthFormType } from 'types/form';
 import { useLoginMutation, useSignUpMutation } from '@features/auth/authApi';
-import { SignUpPayload } from 'types/api';
 import Loader from '@components/UI/Loader';
 
 const AuthPage: FC = () => {
   const [isSignup, setIsSignup] = useState(false);
   const [authErrorMessage, setAuthErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const invitationToken = searchParams.get('invite') || undefined;
 
   const [signUp, { isLoading: isSignupLoading }] = useSignUpMutation();
   const [login, { isLoading: isLoginLoding }] = useLoginMutation();
 
-  const toggleForm = (): void => setIsSignup((prev) => !prev);
+  const toggleForm = (): void => {
+    setAuthErrorMessage(null);
+    setIsSignup((prev) => !prev);
+  };
+
+  useEffect(() => {
+    if (invitationToken) setIsSignup(true);
+  }, [invitationToken]);
 
   // Yup validation schema
   const authValidationSchema = Yup.object({
@@ -49,19 +57,20 @@ const AuthPage: FC = () => {
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm({
+  } = useForm<AuthFormType>({
     resolver: yupResolver(authValidationSchema),
   });
 
   const onSubmit: SubmitHandler<AuthFormType> = async (data) => {
     try {
       if (isSignup) {
-        const signupPayload: SignUpPayload = {
-          name: data.name as string,
-          email: data.email,
-          password: data.password,
-          passwordConfirm: data.passwordConfirm as string,
-        };
+        const signupPayload = new FormData();
+        signupPayload.append('name', data.name as string);
+        signupPayload.append('email', data.email);
+        signupPayload.append('password', data.password);
+        signupPayload.append('passwordConfirm', data.passwordConfirm as string);
+        if (invitationToken) signupPayload.append('invitationToken', invitationToken);
+        if (data.image) signupPayload.append('photo', data.image);
         await signUp(signupPayload).unwrap();
         setIsSignup(false);
       } else {
@@ -70,8 +79,18 @@ const AuthPage: FC = () => {
       reset();
       navigate('/tours', { replace: true });
     } catch (error) {
-      const apiError = error as { data?: { message?: string } };
-      setAuthErrorMessage(apiError.data?.message || 'Unable to log in. Please try again.');
+      const apiError = error as {
+        status?: number | string;
+        data?: { message?: string };
+      };
+      const isServerError =
+        apiError.status === 'FETCH_ERROR' ||
+        (typeof apiError.status === 'number' && apiError.status >= 500);
+      setAuthErrorMessage(
+        isServerError
+          ? 'Unable to log in right now. Please try again shortly.'
+          : apiError.data?.message || 'Unable to log in. Please try again.',
+      );
     }
   };
 
@@ -103,7 +122,7 @@ const AuthPage: FC = () => {
 
         {/* Form Heading */}
         <h2 className="mb-4 text-center text-xl font-semibold">
-          {isSignup ? 'Sign Up' : 'Log In'}
+          {invitationToken ? 'Complete your invitation' : isSignup ? 'Sign Up' : 'Log In'}
         </h2>
         {authErrorMessage && (
           <p
@@ -111,6 +130,11 @@ const AuthPage: FC = () => {
             className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
           >
             {authErrorMessage}
+          </p>
+        )}
+        {invitationToken && (
+          <p className="rounded-md border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary dark:text-primary-extraLight">
+            You are registering with a role invitation. Use the email address that received the invite.
           </p>
         )}
 
@@ -133,6 +157,30 @@ const AuthPage: FC = () => {
           )}
           {errors.name && (
             <p className="text-sm text-red-500">{errors.name?.message}</p>
+          )}
+
+          {isSignup && (
+            <Controller
+              name="image"
+              control={control}
+              render={({ field: { ref, name, onBlur, onChange } }) => (
+                <div>
+                  <label htmlFor="signup-photo" className="mb-2 block text-sm font-medium">
+                    Profile picture <span className="text-gray-500">(optional)</span>
+                  </label>
+                  <input
+                    ref={ref}
+                    name={name}
+                    onBlur={onBlur}
+                    onChange={(event) => onChange(event.target.files?.[0] || null)}
+                    id="signup-photo"
+                    type="file"
+                    accept="image/*"
+                    className="block w-full rounded-lg border border-gray-300 p-2 text-sm dark:border-gray-600 dark:bg-backgroundDark"
+                  />
+                </div>
+              )}
+            />
           )}
 
           {/* Email Input */}
@@ -203,31 +251,33 @@ const AuthPage: FC = () => {
         </form>
 
         {/* Toggle Between Login and Signup */}
-        <div className="text-center dark:text-mutedDark">
-          {isSignup ? (
-            <span>
-              Already have an account?{' '}
-              <ButtonComponent
-                variant="link"
-                onClick={toggleForm}
-                className="text-primary hover:text-primary-focus"
-              >
-                Log in
-              </ButtonComponent>
-            </span>
-          ) : (
-            <span>
-              Need an account?{' '}
-              <ButtonComponent
-                variant="link"
-                onClick={toggleForm}
-                className="text-primary hover:text-primary-focus"
-              >
-                Sign up
-              </ButtonComponent>
-            </span>
-          )}
-        </div>
+        {!invitationToken && (
+          <div className="text-center dark:text-mutedDark">
+            {isSignup ? (
+              <span>
+                Already have an account?{' '}
+                <ButtonComponent
+                  variant="link"
+                  onClick={toggleForm}
+                  className="text-primary hover:text-primary-focus"
+                >
+                  Log in
+                </ButtonComponent>
+              </span>
+            ) : (
+              <span>
+                Need an account?{' '}
+                <ButtonComponent
+                  variant="link"
+                  onClick={toggleForm}
+                  className="text-primary hover:text-primary-focus"
+                >
+                  Sign up
+                </ButtonComponent>
+              </span>
+            )}
+          </div>
+        )}
 
       </div>
     </div>
