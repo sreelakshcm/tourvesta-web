@@ -19,21 +19,37 @@ const Reviews: FC = () => {
   const { data: reviews, isLoading } = useGetMyReviewsQuery();
   const [updateReview, { isLoading: isUpdating }] = useUpdateReviewMutation();
   const [deleteReview, { isLoading: isDeleting }] = useDeleteReviewMutation();
-  const [editingReview, setEditingReview] = useState<EditingReview | null>(null);
+  const [editingReview, setEditingReview] = useState<EditingReview | null>(
+    null,
+  );
   const [reviewToRemove, setReviewToRemove] = useState<string | null>(null);
 
   const saveReview = async (): Promise<void> => {
-    if (!editingReview || !editingReview.rating || !editingReview.review.trim()) return;
-    await updateReview({ ...editingReview, review: editingReview.review.trim() }).unwrap();
+    if (!editingReview || !editingReview.rating || !editingReview.review.trim())
+      return;
+    await updateReview({
+      ...editingReview,
+      review: editingReview.review.trim(),
+    }).unwrap();
     setEditingReview(null);
-    dispatch(setSuccess({ isSuccess: true, successMessage: 'Review updated successfully.' }));
+    dispatch(
+      setSuccess({
+        isSuccess: true,
+        successMessage: 'Review updated successfully.',
+      }),
+    );
   };
 
   const removeReview = async (): Promise<void> => {
     if (!reviewToRemove) return;
     await deleteReview(reviewToRemove).unwrap();
     setReviewToRemove(null);
-    dispatch(setSuccess({ isSuccess: true, successMessage: 'Review deleted successfully.' }));
+    dispatch(
+      setSuccess({
+        isSuccess: true,
+        successMessage: 'Review deleted successfully.',
+      }),
+    );
   };
 
   if (isLoading) return <Loader />;
@@ -59,46 +75,91 @@ const Reviews: FC = () => {
                           key={star}
                           type="button"
                           aria-label={`Rate ${star} out of 5`}
-                          onClick={() => setEditingReview({ ...editingReview, rating: star })}
+                          onClick={() =>
+                            setEditingReview({ ...editingReview, rating: star })
+                          }
                         >
                           <StarIcon
                             size={22}
-                            className={star <= editingReview.rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'}
+                            className={
+                              star <= editingReview.rating
+                                ? 'text-yellow-400'
+                                : 'text-gray-300 dark:text-gray-600'
+                            }
                           />
                         </button>
                       ))}
                     </div>
                     <textarea
                       value={editingReview.review}
-                      onChange={(event) => setEditingReview({ ...editingReview, review: event.target.value })}
+                      onChange={(event) =>
+                        setEditingReview({
+                          ...editingReview,
+                          review: event.target.value,
+                        })
+                      }
                       maxLength={500}
                       rows={4}
                       className="w-full resize-none rounded-lg border border-gray-300 bg-white p-3 text-sm text-fontLight outline-none focus:border-primary dark:border-gray-600 dark:bg-neutral-dark dark:text-fontDark"
                     />
                     <div className="mt-3 flex gap-3 text-sm font-semibold">
-                      <button type="button" disabled={isUpdating} onClick={saveReview} className="text-primary hover:text-primary-hover disabled:opacity-50">
+                      <button
+                        type="button"
+                        disabled={isUpdating}
+                        onClick={saveReview}
+                        className="text-primary hover:text-primary-hover disabled:opacity-50"
+                      >
                         {isUpdating ? 'Saving...' : 'Save'}
                       </button>
-                      <button type="button" onClick={() => setEditingReview(null)} className="text-gray-500 hover:text-gray-700 dark:text-gray-300">Cancel</button>
+                      <button
+                        type="button"
+                        onClick={() => setEditingReview(null)}
+                        className="text-gray-500 hover:text-gray-700 dark:text-gray-300"
+                      >
+                        Cancel
+                      </button>
                     </div>
                   </>
                 ) : (
                   <>
-                    <div className="mb-2 flex text-yellow-500 sm:mb-4"><StarSvg rating={review.rating} /></div>
-                    <p className="mb-2 flex-grow text-sm font-medium text-gray-700 dark:text-gray-200 sm:mb-4 sm:text-base lg:text-lg">{review.review}</p>
+                    <div className="mb-2 flex text-yellow-500 sm:mb-4">
+                      <StarSvg rating={review.rating} />
+                    </div>
+                    <p className="mb-2 flex-grow text-sm font-medium text-gray-700 dark:text-gray-200 sm:mb-4 sm:text-base lg:text-lg">
+                      {review.review}
+                    </p>
                     <p className="mb-2 text-xs font-semibold text-primary sm:text-sm">
-                      {typeof review.tour === 'string' ? 'Tour review' : review.tour.name}
+                      {typeof review.tour === 'string'
+                        ? 'Tour review'
+                        : review.tour.name}
                     </p>
                     <p className="mt-auto text-xs text-gray-500 dark:text-gray-400 sm:text-sm lg:text-base">
-                      Reviewed on {new Date(review.createdAt || Date.now()).toLocaleDateString()}
+                      Reviewed on{' '}
+                      {new Date(
+                        review.createdAt || Date.now(),
+                      ).toLocaleDateString()}
                     </p>
                     <div className="mt-3 flex gap-3 text-sm font-semibold">
                       <button
                         type="button"
-                        onClick={() => setEditingReview({ id: review.id, rating: review.rating, review: review.review })}
+                        onClick={() =>
+                          setEditingReview({
+                            id: review.id,
+                            rating: review.rating,
+                            review: review.review,
+                          })
+                        }
                         className="text-primary hover:text-primary-hover"
-                      >Edit</button>
-                      <button type="button" onClick={() => setReviewToRemove(review.id)} className="text-red-600 hover:text-red-700">Remove</button>
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setReviewToRemove(review.id)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        Remove
+                      </button>
                     </div>
                   </>
                 )}
@@ -106,7 +167,9 @@ const Reviews: FC = () => {
             </div>
           ))}
         </div>
-      ) : <NoData />}
+      ) : (
+        <NoData />
+      )}
       <AlertContainer
         isOpen={Boolean(reviewToRemove)}
         title="Remove review?"

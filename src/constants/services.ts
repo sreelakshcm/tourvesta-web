@@ -1,6 +1,6 @@
 export const tags = ['User', 'Tours', 'Reviews', 'Auth'];
 
-export const SERVICE_BASE_URL = 'http://localhost:5001/api/v1';
+export const SERVICE_BASE_URL = 'https://tourvesta-services.vercel.app/api/v1';
 
 export const TOURS = '/tours';
 
