@@ -19,9 +19,10 @@ const authSlice = createSlice({
   reducers: {
     setToken: (state, action: PayloadAction<string>) => {
       state.token = action.payload;
+      state.user = jwtDecode<CurrentUser>(action.payload);
     },
     getUserDetails: (state) => {
-      state.user = state.token ? jwtDecode(state.token) : null;
+      state.user = state.token ? jwtDecode<CurrentUser>(state.token) : null;
     },
     logout: (state) => {
       state.token = null;

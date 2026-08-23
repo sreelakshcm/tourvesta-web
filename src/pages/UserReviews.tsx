@@ -1,367 +1,376 @@
-// import { useGetAllReviewsQuery } from '@features/reviews/reviewsApi';
-// import React, { useState } from 'react';
-// import { Review } from 'types/tourTypes';
-
-// const ReviewsPage: React.FC = () => {
-//   const { data } = useGetAllReviewsQuery('');
-
-//   const [reviews, setReviews] = useState<Review[]>(data || []);
-//   const [newReview, setNewReview] = useState('');
-//   const [editingId, setEditingId] = useState<string | null>(null);
-//   const [editContent, setEditContent] = useState('');
-
-//   const addReview = (): void => {
-//     // if (newReview.trim()) {
-//     //   setReviews([...reviews, {  review: newReview.trim() }]);
-//     //   setNewReview('');
-//     // }
-//   };
-
-//   const editReview = (id: string, content: string): void => {
-//     setEditingId(id);
-//     setEditContent(content);
-//   };
-
-//   const saveEdit = (): void => {
-//     // setReviews(
-//     //   reviews.map((r) =>
-//     //     r.id === editingId ? { ...r, content: editContent } : r
-//     //   )
-//     // );
-//     setEditingId(null);
-//     setEditContent('');
-//   };
-
-//   const deleteReview = (id: string): void => {
-//     setReviews(reviews.filter((r) => r._id !== id));
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-backgroundLight p-6 dark:bg-backgroundDark">
-//       <h1 className="mb-4 text-2xl font-semibold text-primary dark:text-fontDark">
-//         User Reviews
-//       </h1>
-//       <div className="mb-6">
-//         <input
-//           type="text"
-//           placeholder="Write a review..."
-//           value={newReview}
-//           onChange={(e) => setNewReview(e.target.value)}
-//           className="mb-2 w-full rounded border border-neutral-neutral p-2 
-// text-fontLight focus:outline-primary focus:ring focus:ring-primary/50 dark:border-neutral-dark
-//  dark:bg-neutral-dark dark:text-fontDark"
-//         />
-//         <button
-//           onClick={addReview}
-//           className="rounded bg-primary px-4 py-2 text-white shadow-md hover:bg-primary-hover"
-//         >
-//           Add Review
-//         </button>
-//       </div>
-//       <ul className="space-y-4">
-//         {reviews.map((review) => (
-//           <li
-//             key={review._id}
-//             className="rounded bg-neutral-neutral p-4 shadow-md dark:bg-neutral-dark"
-//           >
-//             {editingId === review._id ? (
-//               <>
-//                 <input
-//                   type="text"
-//                   value={editContent}
-//                   onChange={(e) => setEditContent(e.target.value)}
-//                   className="mb-2 w-full rounded border border-neutral-neutral p-2 
-// text-fontLight focus:outline-primary focus:ring focus:ring-primary/50 
-// dark:border-neutral-dark dark:bg-neutral-dark dark:text-fontDark"
-//                 />
-//                 <div className="flex gap-2">
-//                   <button
-//                     onClick={saveEdit}
-//                     className="rounded bg-primary px-3 py-1 text-white hover:bg-primary-hover"
-//                   >
-//                     Save
-//                   </button>
-//                   <button
-//                     onClick={() => setEditingId(null)}
-//                     className="rounded bg-secondary-light px-3
-//  py-1 text-white hover:bg-secondary"
-//                   >
-//                     Cancel
-//                   </button>
-//                 </div>
-//               </>
-//             ) : (
-//               <>
-//                 <p className="text-fontLight dark:text-fontDark">
-//                   {review.review}
-//                 </p>
-//                 <div className="mt-2 flex gap-2">
-//                   <button
-//                     onClick={() => editReview(review._id, review.review)}
-//                     className="text-secondary hover:underline"
-//                   >
-//                     Edit
-//                   </button>
-//                   <button
-//                     onClick={() => deleteReview(review._id)}
-//                     className="text-red-500 hover:underline"
-//                   >
-//                     Delete
-//                   </button>
-//                 </div>
-//               </>
-//             )}
-//           </li>
-//         ))}
-//       </ul>
-//     </div>
-//   );
-// };
-
-// export default ReviewsPage;
-
+import { useAppDispatch, useAppSelector } from '@app/hooks';
+import ButtonComponent from '@components/UI/Button';
+import AlertContainer from '@components/UI/AlertContainer';
+import Loader from '@components/UI/Loader';
+import { getToken, getUserData } from '@features/auth/authSlice';
+import {
+  useCreateReviewMutation,
+  useDeleteReviewMutation,
+  useGetAllReviewsQuery,
+  useGetMyReviewsQuery,
+  useUpdateReviewMutation,
+} from '@features/reviews/reviewsApi';
+import { useGetAllToursQuery } from '@features/tours/tourApi';
+import { setSuccess } from '@features/UI/themeToggleSlice';
 import { StarIcon } from 'hugeicons-react';
-import React, { useState } from 'react';
+import { ChangeEvent, FC, FormEvent, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Review } from 'types/tourTypes';
 
-interface Review {
-  id: number;
-  review: string;
-  rating: number;
-  tour: string;
-  user: {
-    name: string;
-  };
-}
+const getTourName = (tour: Review['tour']): string =>
+  typeof tour === 'string' ? 'Tour review' : tour.name;
 
-const ReviewsPage: React.FC = () => {
-  const [reviews, setReviews] = useState<Review[]>([
-    {
-      id: 1,
-      review: 'Amazing experience! Highly recommend.',
-      rating: 5,
-      tour: 'Grand Canyon Tour',
-      user: { name: 'John Doe' },
-    },
-    {
-      id: 2,
-      review: 'Great service, but could improve.',
-      rating: 4,
-      tour: 'Safari Adventure',
-      user: { name: 'Jane Smith' },
-    },
-  ]);
-  const [newReview, setNewReview] = useState({
-    review: '',
-    rating: 0,
-    tour: '',
-    user: { name: 'Current User' },
+const RatingStars: FC<{ rating: number }> = ({ rating }) => (
+  <div className="flex items-center gap-1" aria-label={`${rating} out of 5 stars`}>
+    {[1, 2, 3, 4, 5].map((star) => (
+      <StarIcon
+        key={star}
+        size={18}
+        className={
+          star <= rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'
+        }
+      />
+    ))}
+  </div>
+);
+
+const UserReviews: FC = () => {
+  const dispatch = useAppDispatch();
+  const token = useAppSelector(getToken);
+  const user = useAppSelector(getUserData);
+  const isCustomer = user?.role === 'user';
+  const isModerator = user?.role === 'admin';
+  const isGuide = user?.role === 'guide' || user?.role === 'lead-guide';
+  const [draft, setDraft] = useState({ tour: '', rating: 0, review: '' });
+  const [editingReview, setEditingReview] = useState<{
+    id: string;
+    rating: number;
+    review: string;
+  } | null>(null);
+  const [reviewToRemove, setReviewToRemove] = useState<string | null>(null);
+  const { data: reviews = [], isLoading } = useGetAllReviewsQuery('', {
+    skip: !token,
   });
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [editContent, setEditContent] = useState<Review | null>(null);
+  const { data: myReviews = [] } = useGetMyReviewsQuery(undefined, {
+    skip: !isCustomer,
+  });
+  const { data: tours = [] } = useGetAllToursQuery('');
+  const [createReview, { isLoading: isCreating }] = useCreateReviewMutation();
+  const [updateReview, { isLoading: isUpdating }] = useUpdateReviewMutation();
+  const [deleteReview, { isLoading: isDeleting }] = useDeleteReviewMutation();
 
-  const handleRating = (rating: number, isEditing: boolean): void => {
-    if (isEditing && editContent) {
-      setEditContent({ ...editContent, rating });
-    } else {
-      setNewReview({ ...newReview, rating });
-    }
+  const reviewedTourIds = new Set(
+    myReviews.map((review) =>
+      typeof review.tour === 'string' ? review.tour : review.tour._id || review.tour.id,
+    ),
+  );
+  const myReviewIds = new Set(myReviews.map((review) => review.id));
+
+  const submitReview = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
+    event.preventDefault();
+    if (!draft.tour || !draft.rating || !draft.review.trim()) return;
+
+    await createReview({ ...draft, review: draft.review.trim() }).unwrap();
+    setDraft({ tour: '', rating: 0, review: '' });
+    dispatch(
+      setSuccess({
+        isSuccess: true,
+        successMessage: 'Review published successfully!',
+      }),
+    );
   };
 
-  const addReview = (): void => {
-    if (newReview.review.trim() && newReview.rating > 0) {
-      setReviews([...reviews, { ...newReview, id: Date.now() }]);
-      setNewReview({
-        review: '',
-        rating: 0,
-        tour: '',
-        user: { name: 'Current User' },
-      });
-    }
+  const removeReview = async (id: string): Promise<void> => {
+    await deleteReview(id).unwrap();
+    setReviewToRemove(null);
+    dispatch(
+      setSuccess({
+        isSuccess: true,
+        successMessage: 'Review deleted successfully.',
+      }),
+    );
   };
 
-  const editReview = (id: number): void => {
-    const reviewToEdit = reviews.find((r) => r.id === id);
-    if (reviewToEdit) {
-      setEditingId(id);
-      setEditContent(reviewToEdit);
-    }
+  const saveReview = async (): Promise<void> => {
+    if (!editingReview || !editingReview.rating || !editingReview.review.trim()) return;
+
+    await updateReview({
+      ...editingReview,
+      review: editingReview.review.trim(),
+    }).unwrap();
+    setEditingReview(null);
+    dispatch(
+      setSuccess({
+        isSuccess: true,
+        successMessage: 'Review updated successfully.',
+      }),
+    );
   };
 
-  const saveEdit = (): void => {
-    if (editContent?.review.trim() && editContent.rating > 0) {
-      setReviews(
-        reviews.map((r) => (r.id === editingId ? { ...editContent } : r)),
-      );
-      setEditingId(null);
-      setEditContent(null);
-    }
-  };
-
-  const deleteReview = (id: number): void => {
-    setReviews(reviews.filter((r) => r.id !== id));
-  };
+  if (!token) {
+    return (
+      <div className="min-h-[calc(100vh-6.5rem)] bg-backgroundLight p-6 dark:bg-backgroundDark">
+        <div className="mx-auto max-w-xl rounded-xl bg-white p-8 text-center shadow-lg dark:bg-neutral-layout">
+          <h1 className="text-2xl font-bold text-primary">Tour reviews</h1>
+          <p className="mt-3 text-gray-600 dark:text-gray-300">
+            Log in to read and share tour experiences.
+          </p>
+          <Link
+            to="/auth"
+            className="mt-6 inline-block rounded-lg bg-primary px-5 py-2 font-semibold text-white hover:bg-primary-hover"
+          >
+            Log in
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-backgroundLight p-6 dark:bg-backgroundDark">
-      <h1 className="mb-6 text-center text-3xl font-bold text-primary dark:text-fontDark">
-        User Reviews
-      </h1>
+    <div className="min-h-[calc(100vh-6.5rem)] bg-backgroundLight p-4 text-fontLight dark:bg-backgroundDark dark:text-fontDark md:p-8">
+      <div className="mx-auto max-w-6xl">
+        <header className="mb-8 rounded-xl bg-gradient-to-r from-primary to-primary-hover p-6 text-white shadow-lg md:p-8">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">
+            Community feedback
+          </p>
+          <h1 className="mt-2 text-3xl font-bold md:text-4xl">Tour reviews</h1>
+          <p className="mt-2 max-w-2xl text-white/90">
+            {isModerator
+              ? 'Review community feedback and remove content that violates your standards.'
+              : isGuide
+                ? 'Read what guests loved about their tours. Reviewer identities are kept private.'
+                : 'Share your experience and discover feedback from fellow travellers.'}
+          </p>
+        </header>
 
-      {/* Add New Review Section */}
-      <div className="mb-8 rounded-lg bg-neutral-neutral p-6 shadow-lg dark:bg-neutral-dark">
-        <h2 className="mb-4 text-xl font-semibold text-fontLight dark:text-fontDark">
-          Add a Review
-        </h2>
-        <textarea
-          placeholder="Write your review here..."
-          value={newReview.review}
-          onChange={(e) =>
-            setNewReview({ ...newReview, review: e.target.value })
-          }
-          className="mb-4 w-full rounded border border-neutral-neutral p-3 text-fontLight
- focus:outline-primary focus:ring focus:ring-primary/50 dark:border-neutral-dark
- dark:bg-neutral-dark dark:text-fontDark"
-        />
-        <div className="mb-4 flex items-center">
-          <span className="mr-3 text-fontLight dark:text-fontDark">
-            Rating:
-          </span>
-          {[1, 2, 3, 4, 5].map((star) => (
-            <StarIcon
-              key={star}
-              size={24}
-              className={`cursor-pointer ${
-                newReview.rating >= star ? 'text-secondary' : 'text-gray-400'
-              }`}
-              onClick={() => handleRating(star, false)}
-            />
-          ))}
-        </div>
-        <input
-          type="text"
-          placeholder="Tour name"
-          value={newReview.tour}
-          onChange={(e) => setNewReview({ ...newReview, tour: e.target.value })}
-          className="mb-4 w-full rounded border border-neutral-neutral p-3 text-fontLight
- focus:outline-primary focus:ring focus:ring-primary/50 dark:border-neutral-dark
- dark:bg-neutral-dark dark:text-fontDark"
-        />
-        <button
-          onClick={addReview}
-          className="w-full rounded bg-primary px-4 py-2
- text-white shadow-lg hover:bg-primary-hover"
-        >
-          Add Review
-        </button>
-      </div>
-
-      {/* Display Reviews */}
-      <ul className="space-y-6">
-        {reviews.map((review) => (
-          <li
-            key={review.id}
-            className="rounded-lg bg-neutral-neutral p-6 shadow-lg dark:bg-neutral-dark"
-          >
-            {editingId === review.id && editContent ? (
-              <>
+        {isCustomer && (
+          <section className="mb-8 rounded-xl bg-white p-6 shadow-lg dark:bg-neutral-layout md:p-8">
+            <div className="mb-5">
+              <h2 className="text-xl font-bold text-primary">Write a review</h2>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                You can submit one review for each tour.
+              </p>
+            </div>
+            <form onSubmit={submitReview} className="grid gap-5 md:grid-cols-2">
+              <label className="text-sm font-medium">
+                Tour
+                <select
+                  value={draft.tour}
+                  onChange={(event: ChangeEvent<HTMLSelectElement>) =>
+                    setDraft({ ...draft, tour: event.target.value })
+                  }
+                  required
+                  className="mt-2 w-full rounded-lg border border-gray-300 bg-white p-3 text-fontLight outline-none focus:border-primary dark:border-gray-600 dark:bg-neutral-dark dark:text-fontDark"
+                >
+                  <option value="">Select a tour</option>
+                  {tours.map((tour) => (
+                    <option
+                      key={tour._id}
+                      value={tour._id}
+                      disabled={reviewedTourIds.has(tour._id)}
+                    >
+                      {tour.name}
+                      {reviewedTourIds.has(tour._id) ? ' (reviewed)' : ''}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <fieldset className="text-sm font-medium">
+                <legend>Rating</legend>
+                <div className="mt-3 flex gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      aria-label={`Rate ${star} out of 5`}
+                      onClick={() => setDraft({ ...draft, rating: star })}
+                    >
+                      <StarIcon
+                        size={28}
+                        className={
+                          star <= draft.rating
+                            ? 'text-yellow-400'
+                            : 'text-gray-300 dark:text-gray-600'
+                        }
+                      />
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+              <label className="text-sm font-medium md:col-span-2">
+                Your experience
                 <textarea
-                  value={editContent.review}
-                  onChange={(e) =>
-                    setEditContent({ ...editContent, review: e.target.value })
+                  value={draft.review}
+                  onChange={(event: ChangeEvent<HTMLTextAreaElement>) =>
+                    setDraft({ ...draft, review: event.target.value })
                   }
-                  className="mb-4 w-full rounded border border-neutral-neutral p-3
- text-fontLight focus:outline-primary focus:ring focus:ring-primary/50
- dark:border-neutral-dark dark:bg-neutral-dark dark:text-fontDark"
+                  required
+                  maxLength={500}
+                  rows={5}
+                  placeholder="Tell travellers what stood out..."
+                  className="mt-2 w-full resize-none rounded-lg border border-gray-300 bg-white p-3 text-fontLight outline-none focus:border-primary dark:border-gray-600 dark:bg-neutral-dark dark:text-fontDark"
                 />
-                <div className="mb-4 flex items-center">
-                  <span className="mr-3 text-fontLight dark:text-fontDark">
-                    Rating:
-                  </span>
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <StarIcon
-                      key={star}
-                      size={24}
-                      className={`cursor-pointer ${
-                        editContent.rating >= star
-                          ? 'text-secondary'
-                          : 'text-gray-400'
-                      }`}
-                      onClick={() => handleRating(star, true)}
-                    />
-                  ))}
-                </div>
-                <input
-                  type="text"
-                  value={editContent.tour}
-                  onChange={(e) =>
-                    setEditContent({ ...editContent, tour: e.target.value })
-                  }
-                  className="mb-4 w-full rounded border border-neutral-neutral p-3
- text-fontLight focus:outline-primary focus:ring focus:ring-primary/50
- dark:border-neutral-dark dark:bg-neutral-dark dark:text-fontDark"
-                />
-                <div className="flex gap-4">
-                  <button
-                    onClick={saveEdit}
-                    className="w-full rounded bg-primary px-4 py-2
- text-white shadow-lg hover:bg-primary-hover"
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={() => setEditingId(null)}
-                    className="w-full rounded bg-secondary-light px-4 py-2
- text-white shadow-lg hover:bg-secondary"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <p className="mb-2 text-xl font-semibold text-fontLight dark:text-fontDark">
-                  {review.review}
-                </p>
-                <div className="mb-2 flex items-center">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <StarIcon
-                      key={star}
-                      size={20}
-                      className={`${
-                        review.rating >= star
-                          ? 'text-secondary'
-                          : 'text-gray-400'
-                      }`}
-                    />
-                  ))}
-                </div>
-                <p className="mb-2 text-fontLight dark:text-mutedDark">
-                  <strong>Tour:</strong> {review.tour}
-                </p>
-                <p className="text-fontLight dark:text-mutedDark">
-                  <strong>User:</strong> {review.user.name}
-                </p>
-                <div className="mt-4 flex gap-4">
-                  <button
-                    onClick={() => editReview(review.id)}
-                    className="text-secondary hover:underline"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => deleteReview(review.id)}
-                    className="text-red-500 hover:underline"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </>
-            )}
-          </li>
-        ))}
-      </ul>
+                <span className="mt-1 block text-right text-xs text-gray-500">
+                  {draft.review.length}/500
+                </span>
+              </label>
+              <div className="md:col-span-2 md:flex md:justify-end">
+                <ButtonComponent
+                  type="submit"
+                  disabled={isCreating}
+                  className="w-full bg-primary px-6 py-3 text-white hover:bg-primary-hover md:w-auto"
+                >
+                  {isCreating ? 'Publishing...' : 'Publish review'}
+                </ButtonComponent>
+              </div>
+            </form>
+          </section>
+        )}
+
+        <section>
+          <div className="mb-5 flex items-end justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-primary">Traveller feedback</h2>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                {reviews.length} {reviews.length === 1 ? 'review' : 'reviews'}
+              </p>
+            </div>
+          </div>
+          {isLoading ? (
+            <Loader />
+          ) : reviews.length === 0 ? (
+            <div className="rounded-xl bg-white p-10 text-center shadow-lg dark:bg-neutral-layout">
+              <p className="text-gray-600 dark:text-gray-300">
+                No reviews yet. Be the first to share an experience.
+              </p>
+            </div>
+          ) : (
+            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {reviews.map((review) => (
+                <article
+                  key={review.id}
+                  className="flex min-h-64 flex-col rounded-xl bg-white p-6 shadow-lg transition-shadow hover:shadow-xl dark:bg-neutral-layout"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+                        {getTourName(review.tour)}
+                      </p>
+                      {!isGuide && review.user?.name && (
+                        <p className="mt-2 font-semibold">{review.user.name}</p>
+                      )}
+                    </div>
+                    <RatingStars rating={review.rating} />
+                  </div>
+                  {editingReview?.id === review.id ? (
+                    <div className="mt-5 flex-1">
+                      <textarea
+                        value={editingReview.review}
+                        onChange={(event) =>
+                          setEditingReview({
+                            ...editingReview,
+                            review: event.target.value,
+                          })
+                        }
+                        maxLength={500}
+                        rows={4}
+                        className="w-full resize-none rounded-lg border border-gray-300 bg-white p-3 text-fontLight outline-none focus:border-primary dark:border-gray-600 dark:bg-neutral-dark dark:text-fontDark"
+                      />
+                      <div className="mt-3 flex gap-2">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            aria-label={`Rate ${star} out of 5`}
+                            onClick={() => setEditingReview({ ...editingReview, rating: star })}
+                          >
+                            <StarIcon
+                              size={24}
+                              className={
+                                star <= editingReview.rating
+                                  ? 'text-yellow-400'
+                                  : 'text-gray-300 dark:text-gray-600'
+                              }
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="mt-5 flex-1 leading-relaxed text-gray-700 dark:text-gray-200">
+                      {review.review}
+                    </p>
+                  )}
+                  <div className="mt-5 flex items-center justify-between border-t border-gray-100 pt-4 text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
+                    <span>
+                      {review.createdAt
+                        ? new Date(review.createdAt).toLocaleDateString()
+                        : 'Recent'}
+                    </span>
+                    <div className="flex items-center gap-3">
+                      {myReviewIds.has(review.id) && editingReview?.id !== review.id && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setEditingReview({
+                              id: review.id,
+                              rating: review.rating,
+                              review: review.review,
+                            })
+                          }
+                          className="font-semibold text-primary hover:text-primary-hover"
+                        >
+                          Edit
+                        </button>
+                      )}
+                      {editingReview?.id === review.id && (
+                        <>
+                          <button
+                            type="button"
+                            disabled={isUpdating}
+                            onClick={saveReview}
+                            className="font-semibold text-primary hover:text-primary-hover disabled:opacity-50"
+                          >
+                            {isUpdating ? 'Saving...' : 'Save'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditingReview(null)}
+                            className="font-semibold text-gray-500 hover:text-gray-700"
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      )}
+                      {(isModerator || myReviewIds.has(review.id)) && (
+                        <button
+                          type="button"
+                          disabled={isDeleting}
+                          onClick={() => setReviewToRemove(review.id)}
+                          className="font-semibold text-red-600 hover:text-red-700 disabled:opacity-50"
+                        >
+                          {isDeleting ? 'Deleting...' : 'Remove'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+      <AlertContainer
+        isOpen={Boolean(reviewToRemove)}
+        title="Remove review?"
+        message="This review will be permanently deleted and cannot be recovered."
+        confirmLabel="Remove review"
+        isConfirming={isDeleting}
+        onConfirm={() => reviewToRemove && removeReview(reviewToRemove)}
+        onCancel={() => setReviewToRemove(null)}
+      />
     </div>
   );
 };
 
-export default ReviewsPage;
+export default UserReviews;

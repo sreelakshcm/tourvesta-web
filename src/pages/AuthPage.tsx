@@ -6,7 +6,7 @@ import RenderAbstractBg from '@components/common/RenderAbstractBg';
 import ButtonComponent from '@components/UI/Button';
 import Input from '@components/UI/inputComponent';
 import { Mail01Icon } from 'hugeicons-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import ThemeToggle from '@components/UI/ThemeToggleButton';
 import RenderLogo from '@components/common/RenderLogo';
 import { DEFAULT_INPUT_CLASSNAMES, SECONDARY_COLOR } from '@constants/styles';
@@ -15,20 +15,13 @@ import { AuthFormType } from 'types/form';
 import { useLoginMutation, useSignUpMutation } from '@features/auth/authApi';
 import { SignUpPayload } from 'types/api';
 import Loader from '@components/UI/Loader';
-import { useAppDispatch } from '@app/hooks';
-import { getUserDetails, setToken } from '@features/auth/authSlice';
-import {
-  setSuccess,
-} from '@features/UI/themeToggleSlice';
-import Alert from '@components/UI/Alert';
 
 const AuthPage: FC = () => {
   const [isSignup, setIsSignup] = useState(false);
-  const dispatch = useAppDispatch();
+  const [authErrorMessage, setAuthErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const [signUp, { isLoading: isSignupLoading, isError, error }] =
-    useSignUpMutation();
+  const [signUp, { isLoading: isSignupLoading }] = useSignUpMutation();
   const [login, { isLoading: isLoginLoding }] = useLoginMutation();
 
   const toggleForm = (): void => setIsSignup((prev) => !prev);
@@ -61,38 +54,28 @@ const AuthPage: FC = () => {
   });
 
   const onSubmit: SubmitHandler<AuthFormType> = async (data) => {
-    if (isSignup) {
-      const signupPayload: SignUpPayload = {
-        name: data.name as string,
-        email: data.email,
-        password: data.password,
-        passwordConfirm: data.passwordConfirm as string,
-      };
-      const { token } = await signUp(signupPayload).unwrap();
-
-      setIsSignup(false);
-      dispatch(setToken(token));
-      dispatch(
-        setSuccess({
-          isSuccess: true,
-          successMessage: 'User registered successfully!',
-        }),
-      );
-    } else {
-      const credentials = {
-        email: data.email,
-        password: data.password,
-      };
-      await login(credentials).unwrap();
+    try {
+      if (isSignup) {
+        const signupPayload: SignUpPayload = {
+          name: data.name as string,
+          email: data.email,
+          password: data.password,
+          passwordConfirm: data.passwordConfirm as string,
+        };
+        await signUp(signupPayload).unwrap();
+        setIsSignup(false);
+      } else {
+        await login({ email: data.email, password: data.password }).unwrap();
+      }
+      reset();
+      navigate('/tours', { replace: true });
+    } catch (error) {
+      const apiError = error as { data?: { message?: string } };
+      setAuthErrorMessage(apiError.data?.message || 'Unable to log in. Please try again.');
     }
-    reset();
-    dispatch(getUserDetails());
-    navigate('/');
   };
 
   if (isLoginLoding || isSignupLoading) return <Loader />;
-
-  if (isError) return <Alert message={JSON.stringify(error)} type="error" />;
 
   return (
     <div
@@ -122,6 +105,14 @@ const AuthPage: FC = () => {
         <h2 className="mb-4 text-center text-xl font-semibold">
           {isSignup ? 'Sign Up' : 'Log In'}
         </h2>
+        {authErrorMessage && (
+          <p
+            role="alert"
+            className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
+          >
+            {authErrorMessage}
+          </p>
+        )}
 
         {/* Form Fields */}
         <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
@@ -238,17 +229,6 @@ const AuthPage: FC = () => {
           )}
         </div>
 
-        {/* Forgot Password Link (only for Login) */}
-        {!isSignup && (
-          <div className="mt-4 text-center text-sm dark:text-mutedDark">
-            <Link
-              to="/forgot-password"
-              className="text-secondary hover:text-secondary-focus"
-            >
-              Forgot Password?
-            </Link>
-          </div>
-        )}
       </div>
     </div>
   );

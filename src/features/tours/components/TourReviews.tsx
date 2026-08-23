@@ -20,11 +20,13 @@ transition-shadow hover:shadow-xl dark:bg-neutral-dark"
                 className="flex h-14 w-14 items-center justify-center rounded-full
 bg-gray-200 text-lg font-bold text-gray-500 dark:bg-gray-700 dark:text-gray-300"
               >
-                {review.user.name.charAt(0).toUpperCase()}
+                {review.user?.name?.charAt(0).toUpperCase() ?? 'G'}
               </div>
               {/* User Info */}
               <div>
-                <p className="text-lg font-semibold">{review.user.name}</p>
+                <p className="text-lg font-semibold">
+                  {review.user?.name ?? 'Guest reviewer'}
+                </p>
                 <div className="flex items-center gap-1">
                   {[...Array(5)].map((_, i) => (
                     <StarIcon

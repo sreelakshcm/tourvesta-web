@@ -7,7 +7,7 @@ import NavigationLinks from './NavigationLinks';
 import ThemeToggle from '@components/UI/ThemeToggleButton';
 import { useAppDispatch, useAppSelector } from '@app/hooks';
 import { selectTheme, setSuccess } from '@features/UI/themeToggleSlice';
-import { getToken, getUserData } from '@features/auth/authSlice';
+import { getToken, getUserData, logout } from '@features/auth/authSlice';
 import { isSearch } from '@features/UI/navbarSlice';
 import { getAllTourData } from '@features/tours/tourActions';
 import { setupClickOutsideListener } from '@utils/clickOutsideHandler';
@@ -15,6 +15,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useSendLogoutMutation } from '@features/auth/authApi';
 import Loader from '@components/UI/Loader';
 import { AUTH } from '@constants/services';
+import { useGetMeQuery } from '@features/users/userApi';
+import { apiSlice } from '@app/api';
+import { clearErrorState } from '@features/UI/themeToggleSlice';
 
 const Navbar: FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -31,7 +34,8 @@ const Navbar: FC = () => {
 
   const dispatch = useAppDispatch();
 
-  const [logout, { isLoading, isError, error }] = useSendLogoutMutation();
+  const [sendLogout, { isLoading, isError, error }] = useSendLogoutMutation();
+  const { data: currentUser } = useGetMeQuery(undefined, { skip: !token });
 
   const mobileNavbarMenuRef = useRef<HTMLDivElement>(null);
   const searchBarNavRef = useRef<HTMLDivElement>(null);
@@ -54,10 +58,17 @@ const Navbar: FC = () => {
     );
   }, []);
 
-  const logOut = (): void => {
-    navigate(`${AUTH}`);
-    logout('');
+  const logOut = async (): Promise<void> => {
     setIsMobileMenuOpen(false);
+    setIsUserSettingsMenuOpen(false);
+    try {
+      await sendLogout('').unwrap();
+    } finally {
+      dispatch(logout());
+      dispatch(apiSlice.util.resetApiState());
+      dispatch(clearErrorState());
+      navigate(AUTH, { replace: true });
+    }
     dispatch(
       setSuccess({
         isSuccess: true,
@@ -102,12 +113,20 @@ const Navbar: FC = () => {
               className="relative"
             >
               <button onClick={toggleDropdown}>
-                <div
-                  className="flex h-12 w-12 items-center justify-center rounded-full
+                {currentUser?.photo ? (
+                  <img
+                    src={currentUser.photo}
+                    alt={`${currentUser.name}'s profile`}
+                    className="h-12 w-12 rounded-full object-cover"
+                  />
+                ) : (
+                  <div
+                    className="flex h-12 w-12 items-center justify-center rounded-full
 bg-gray-200 text-lg font-bold text-gray-500 dark:bg-gray-700 dark:text-gray-300"
-                >
-                  {userDetails?.name?.charAt(0).toUpperCase()}
-                </div>
+                  >
+                    {userDetails?.name?.charAt(0).toUpperCase()}
+                  </div>
+                )}
               </button>
               {isUserSettingsMenuOpen && (
                 <div
@@ -134,7 +153,10 @@ shadow-lg transition-transform duration-300 ease-in-out dark:bg-neutral-dark"
                   <button
                     className="w-full px-4 py-2 text-left text-sm text-gray-700 transition-colors
  hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-neutral-700"
-                    onClick={() => console.log('Update Password clicked')}
+                    onClick={() => {
+                      navigate('/update-password');
+                      setIsUserSettingsMenuOpen(false);
+                    }}
                   >
                     Update Password
                   </button>

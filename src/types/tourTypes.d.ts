@@ -38,6 +38,7 @@ export type User = {
   role: 'admin' | 'user' | 'guide' | 'lead-guide';
   password: string;
   active: boolean;
+  photo?: string;
 };
 
 export type CurrentUser = {
@@ -53,7 +54,7 @@ export type Review = {
   id: string;
   review: string;
   rating: number;
-  tour: string;
-  user: { name: string };
+  tour: string | { id?: string; _id?: string; name: string };
+  user?: { name: string };
   createdAt?: string;
 };

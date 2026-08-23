@@ -5,8 +5,9 @@ import {
   AuthResponseType,
   LoginPayload,
   SignUpPayload,
+  UpdatePasswordPayload,
 } from 'types/api';
-import { logout, setToken } from './authSlice';
+import { setToken } from './authSlice';
 import { setSuccess } from '@features/UI/themeToggleSlice';
 
 export const authApi = apiSlice.injectEndpoints({
@@ -21,6 +22,23 @@ export const authApi = apiSlice.injectEndpoints({
         return { token: response.token };
       },
       invalidatesTags: ['Auth'],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          const {
+            data: { token },
+          } = await queryFulfilled;
+          dispatch(setToken(token));
+          dispatch(
+            setSuccess({
+              isSuccess: true,
+              successMessage: 'User registered successfully!',
+            }),
+          );
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.error('Error while signing up:', err);
+        }
+      },
     }),
     login: builder.mutation<{ token: string }, LoginPayload>({
       query: (credentials: LoginPayload) => ({
@@ -56,22 +74,33 @@ export const authApi = apiSlice.injectEndpoints({
         url: `${AUTH}/logout`,
         method: 'POST',
       }),
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          dispatch(logout());
-          dispatch(apiSlice.util.resetApiState());
-        } catch (err) {
-          // eslint-disable-next-line no-console
-          console.error('Error sending logout request:', err);
-        }
-      },
     }),
     refresh: builder.mutation({
       query: () => ({
         url: `${AUTH}/refresh`,
         method: 'GET',
       }),
+    }),
+    updatePassword: builder.mutation<{ token: string }, UpdatePasswordPayload>({
+      query: (payload) => ({
+        url: `${USERS}/updatePassword`,
+        method: 'PATCH',
+        body: payload,
+      }),
+      transformResponse: (response: AuthResponseType): { token: string } => ({
+        token: response.token,
+      }),
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          const {
+            data: { token },
+          } = await queryFulfilled;
+          dispatch(setToken(token));
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.error('Error while updating password:', err);
+        }
+      },
     }),
   }),
 });
@@ -81,4 +110,5 @@ export const {
   useRefreshMutation,
   useSendLogoutMutation,
   useLoginMutation,
+  useUpdatePasswordMutation,
 } = authApi;

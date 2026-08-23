@@ -33,6 +33,12 @@ export type SignUpPayload = {
 
 export type LoginPayload = Pick<SignUpPayload, 'email' | 'password'>;
 
+export type UpdatePasswordPayload = {
+  currentPassword: string;
+  newPassword: string;
+  newPasswordConfirm: string;
+};
+
 export type AuthData = Pick<User, 'name' | 'role' | 'email' | 'active'>;
 
 export type AuthResponseType = ApiResponse & {

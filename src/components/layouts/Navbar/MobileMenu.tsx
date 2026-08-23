@@ -7,7 +7,7 @@ interface MobileMenuProps {
   closeMenu: () => void;
   token: string | null;
   userName?: string;
-  logOut: () => void;
+  logOut: () => Promise<void>;
 }
 
 const MobileMenu: FC<MobileMenuProps> = ({
@@ -75,7 +75,10 @@ py-6 shadow-lg dark:bg-neutral-dark"
           <div className="w-full space-y-2">
             <button
               className="w-full rounded-md px-4 py-2 text-sm transition hover:text-primary-hover"
-              onClick={() => console.log('Update Password clicked')}
+              onClick={() => {
+                navigate('/update-password');
+                closeMenu();
+              }}
             >
               Update Password
             </button>

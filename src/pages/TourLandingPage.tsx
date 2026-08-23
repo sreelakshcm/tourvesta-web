@@ -10,19 +10,16 @@ import {
   setSearchQuery,
 } from '@features/UI/navbarSlice';
 import {
-  getErrors,
   setAlertError,
   setError,
 } from '@features/UI/themeToggleSlice';
 import NoResults from '@components/common/Illustrations/NoResults';
-import UnauthorizedPage from '@components/common/Illustrations/UnAuthorizedPage';
 import { ApiErrorResponse } from 'types/api';
 import TourFilters from '@features/tours/components/TourFilters';
 import ToursHeader from '@features/tours/components/ToursHeader';
 
 const TourLandingPage: React.FC = () => {
   const tours = useAppSelector((state) => state.tours.tours);
-  const globalError = useAppSelector(getErrors);
   const searchQuery = useAppSelector(getSearchQuery);
   const {
     isError, isLoading, isFetching, data, error, 
@@ -167,9 +164,6 @@ const TourLandingPage: React.FC = () => {
       ) : (
         <TourCard tours={filteredTours} />
       )}
-      {globalError.isError &&
-        (globalError.errorStatus === 401 ||
-          globalError.errorStatus === 500) && <UnauthorizedPage />}
     </>
   );
 };

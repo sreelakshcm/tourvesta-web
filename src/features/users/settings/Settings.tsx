@@ -1,61 +1,76 @@
 import ButtonComponent from '@components/UI/Button';
 import Input from '@components/UI/inputComponent';
-import PasswordInput from '@components/UI/inputComponent/Password';
 import { DEFAULT_INPUT_CLASSNAMES, SECONDARY_COLOR } from '@constants/styles';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Mail01Icon } from 'hugeicons-react';
-import { FC } from 'react';
+import { ChangeEvent, FC, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import * as Yup from 'yup';
+import { useGetMeQuery, useUpdateMeMutation } from '@features/users/userApi';
+import { useAppDispatch } from '@app/hooks';
+import { setSuccess } from '@features/UI/themeToggleSlice';
+import UpdatePasswordForm from '@features/auth/components/UpdatePasswordForm';
+
+type ProfileFormValues = {
+  name: string;
+  email: string;
+  image?: File | null;
+};
 
 const Settings: FC = () => {
+  const dispatch = useAppDispatch();
+  const { data: user } = useGetMeQuery();
+  const [updateMe, { isLoading: isUpdating }] = useUpdateMeMutation();
+  const [previewUrl, setPreviewUrl] = useState<string>();
   const profileSchema = Yup.object({
     name: Yup.string().required('Name is required'),
     email: Yup.string()
       .email('Invalid Email Address')
       .required('Email is required'),
-    image: Yup.string().notRequired(),
-  });
-
-  // Password update form schema
-  const passwordSchema = Yup.object({
-    currentPassword: Yup.string()
-      .min(8, 'Current Password must be at least 8 characters')
-      .required('Current Password is required'),
-    newPassword: Yup.string()
-      .min(8, 'New Password must be at least 8 characters')
-      .required('New Password is required'),
-    newPasswordConfirm: Yup.string()
-      .oneOf([Yup.ref('newPassword')], 'Passwords must match')
-      .required('Confirm New Password is required'),
+    image: Yup.mixed<File>().notRequired(),
   });
 
   // Profile form setup
   const {
     control: profileControl,
     handleSubmit: profileHandleSubmit,
+    reset: resetProfile,
     formState: { errors: profileErrors },
-  } = useForm({
+  } = useForm<ProfileFormValues>({
     resolver: yupResolver(profileSchema),
   });
 
-  // Password form setup
-  const {
-    control: passwordControl,
-    handleSubmit: passwordHandleSubmit,
-    formState: { errors: passwordErrors },
-  } = useForm({
-    resolver: yupResolver(passwordSchema),
-  });
+  useEffect(() => {
+    if (user) {
+      resetProfile({ name: user.name, email: user.email });
+      setPreviewUrl(user.photo);
+    }
+  }, [resetProfile, user]);
 
   // Handle profile form submission
-  const onProfileSubmit = (data): void => {
-    console.log('Profile data:', data);
+  const onProfileSubmit = async (data: ProfileFormValues): Promise<void> => {
+    const formData = new FormData();
+    formData.append('name', data.name);
+    formData.append('email', data.email);
+    if (data.image) formData.append('photo', data.image);
+
+    const updatedUser = await updateMe(formData).unwrap();
+    setPreviewUrl(updatedUser.photo);
+    dispatch(
+      setSuccess({
+        isSuccess: true,
+        successMessage: 'Profile updated successfully!',
+      }),
+    );
   };
 
-  // Handle password form submission
-  const onPasswordSubmit = (data): void => {
-    console.log('Password data:', data);
+  const handleImageChange = (
+    event: ChangeEvent<HTMLInputElement>,
+    onChange: (_file?: File) => void,
+  ): void => {
+    const file = event.target.files?.[0];
+    onChange(file);
+    if (file) setPreviewUrl(URL.createObjectURL(file));
   };
 
   return (
@@ -113,15 +128,27 @@ placeholder:text-sm sm:placeholder:text-base`}
             )}
           </div>
           <div>
+            {previewUrl && (
+              <img
+                src={previewUrl}
+                alt="Profile preview"
+                className="mb-3 h-20 w-20 rounded-full object-cover"
+              />
+            )}
             <Controller
               name="image"
               control={profileControl}
-              render={({ field }) => (
+              render={({ field: { ref, name, onBlur, onChange } }) => (
                 <input
-                  {...field}
+                  ref={ref}
+                  name={name}
+                  onBlur={onBlur}
                   type="file"
                   id="image"
-                  className="block w-full rounded-lg border-gray-300 text-sm shadow-sm dark:border-gray-600 dark:bg-backgroundDark"
+                  accept="image/*"
+                  onChange={(event) => handleImageChange(event, onChange)}
+                  className="block w-full rounded-lg border-gray-300 text-sm shadow-sm
+                    dark:border-gray-600 dark:bg-backgroundDark"
                 />
               )}
             />
@@ -132,8 +159,9 @@ placeholder:text-sm sm:placeholder:text-base`}
               className="mt-4 w-52 rounded-lg bg-primary py-2 text-base font-semibold
               text-white shadow-md hover:bg-primary-hover focus:outline-none"
               variant="filled"
+              disabled={isUpdating}
             >
-              Save Changes
+              {isUpdating ? 'Saving...' : 'Save Changes'}
             </ButtonComponent>
           </div>
         </form>
@@ -143,81 +171,7 @@ placeholder:text-sm sm:placeholder:text-base`}
         Update Password
       </h2>
       <div className="flex items-center justify-center">
-        <form
-          onSubmit={passwordHandleSubmit(onPasswordSubmit)}
-          className="grid w-full gap-6 md:w-2/3"
-        >
-          <div>
-            <Controller
-              name="currentPassword"
-              control={passwordControl}
-              render={({ field }) => (
-                <PasswordInput
-                  {...field}
-                  id="currentPassword"
-                  placeholder="Current Password"
-                  className={`${DEFAULT_INPUT_CLASSNAMES} 
-placeholder:text-sm sm:placeholder:text-base`}
-                />
-              )}
-            />
-            {passwordErrors.currentPassword && (
-              <p className="mt-1 text-sm text-red-500">
-                {passwordErrors.currentPassword?.message}
-              </p>
-            )}
-          </div>
-          <div>
-            <Controller
-              name="newPassword"
-              control={passwordControl}
-              render={({ field }) => (
-                <PasswordInput
-                  {...field}
-                  id="newPassword"
-                  placeholder="New Password"
-                  className={`${DEFAULT_INPUT_CLASSNAMES} 
-placeholder:text-sm sm:placeholder:text-base`}
-                />
-              )}
-            />
-            {passwordErrors.newPassword && (
-              <p className="mt-1 text-sm text-red-500">
-                {passwordErrors.newPassword?.message}
-              </p>
-            )}
-          </div>
-          <div>
-            <Controller
-              name="newPasswordConfirm"
-              control={passwordControl}
-              render={({ field }) => (
-                <PasswordInput
-                  {...field}
-                  id="newPasswordConfirm"
-                  placeholder="Confirm New Password"
-                  className={`${DEFAULT_INPUT_CLASSNAMES} 
-placeholder:text-sm sm:placeholder:text-base`}
-                />
-              )}
-            />
-            {passwordErrors.newPasswordConfirm && (
-              <p className="mt-1 text-sm text-red-500">
-                {passwordErrors.newPasswordConfirm?.message}
-              </p>
-            )}
-          </div>
-          <div className="flex w-full items-center justify-end">
-            <ButtonComponent
-              type="submit"
-              className="mt-4 w-52 rounded-lg bg-primary py-2 text-base font-semibold
-              text-white shadow-md hover:bg-primary-hover focus:outline-none"
-              variant="filled"
-            >
-              Update Password
-            </ButtonComponent>
-          </div>
-        </form>
+        <UpdatePasswordForm />
       </div>
     </div>
   );
