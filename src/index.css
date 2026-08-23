@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: 'REM', sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0px;
+  padding: 0px;
+}
+
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+  border: none !important;
+}
+
+.leaflet-touch .leaflet-bar a {
+  border-radius: 100% !important;
+  width: 41.6px !important;
+  height: 41.6px !important;
+  text-align: center !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.leaflet-touch .leaflet-bar a:hover {
+  background-color: rgb(226 232 240 / var(--tw-bg-opacity, 1));
+}
+
+.leaflet-control-zoom a.leaflet-control-zoom-in,
+.leaflet-control-zoom a.leaflet-control-zoom-out {
+  background-color: #fff;
+  border: none !important;
+  --tw-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --tw-shadow-colored: 0 10px 15px -3px var(--tw-shadow-color),
+    0 4px 6px -4px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),
+    var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+  color: rgb(31 41 55 / var(--tw-text-opacity, 1)) !important;
+  padding: 0.5rem /* 8px */;
+  margin-bottom: 10px;
+}
