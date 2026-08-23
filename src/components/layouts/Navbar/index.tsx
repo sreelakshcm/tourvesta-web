@@ -18,6 +18,8 @@ import { AUTH } from '@constants/services';
 import { useGetMeQuery } from '@features/users/userApi';
 import { apiSlice } from '@app/api';
 import { clearErrorState } from '@features/UI/themeToggleSlice';
+import darkCloseMenu from '@assets/svg/close-menu-dark.svg';
+import lightCloseMenu from '@assets/svg/close-menu-light.svg';
 
 const Navbar: FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -199,7 +201,7 @@ shadow-lg transition-transform duration-300 ease-in-out dark:bg-neutral-dark"
               className="h-10 w-10 p-2"
             >
               <img
-                src={`/src/assets/svg/close-menu-${theme}.svg`}
+                src={theme === 'dark' ? darkCloseMenu : lightCloseMenu}
                 alt="close menu"
                 className="h-full w-full"
               />

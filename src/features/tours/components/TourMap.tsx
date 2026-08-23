@@ -4,12 +4,13 @@ import { TourLocations } from 'types/tourTypes';
 import 'leaflet/dist/leaflet.css';
 import { Gps01Icon } from 'hugeicons-react';
 import Leaflet from 'leaflet';
+import locationMarker from '@assets/svg/Location.svg';
 
 const customMarker = Leaflet.icon({
   iconSize: [30, 30],
   iconAnchor: [15, 30],
   popupAnchor: [0, -30],
-  iconUrl: '/src/assets/svg/Location.svg',
+  iconUrl: locationMarker,
 });
 
 const ResetMapButton: FC<{

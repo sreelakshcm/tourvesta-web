@@ -3,6 +3,7 @@ import { AUTH } from '@constants/services';
 import { clearErrorState, getErrors } from '@features/UI/themeToggleSlice';
 import React from 'react';
 import { Link } from 'react-router-dom';
+import invalidIllustration from '@assets/svg/invalid.svg';
 
 const UnauthorizedPage: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -17,7 +18,7 @@ const UnauthorizedPage: React.FC = () => {
         {/* Illustration */}
         <div className="flex justify-center">
           <img
-            src="/src/assets/svg/invalid.svg" // Replace with your SVG or illustration
+            src={invalidIllustration}
             alt="Session Expired"
             className="h-40 w-40 sm:h-52 sm:w-52"
           />

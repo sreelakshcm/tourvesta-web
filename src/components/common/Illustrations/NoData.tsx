@@ -2,6 +2,8 @@ import { useAppSelector } from '@app/hooks';
 import ButtonComponent from '@components/UI/Button';
 import { selectTheme } from '@features/UI/themeToggleSlice';
 import { FC } from 'react';
+import darkNoData from '@assets/svg/no-data-dark.svg';
+import lightNoData from '@assets/svg/no-data-light.svg';
 
 interface NoDataProps {
   buttonText?: string;
@@ -20,7 +22,7 @@ const NoData: FC<NoDataProps> = ({
         {/* Illustration */}
         <div className="flex justify-center">
           <img
-            src={`/src/assets/svg/no-data-${theme}.svg`}
+            src={theme === 'dark' ? darkNoData : lightNoData}
             alt="No Data Illustration"
             className="h-40 w-40 sm:h-60 sm:w-60 md:h-80 md:w-80"
           />

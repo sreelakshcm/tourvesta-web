@@ -3,6 +3,8 @@ import { TOURS } from '@constants/services';
 import { selectTheme } from '@features/UI/themeToggleSlice';
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
+import darkLogo from '@assets/svg/app-logo-dark.svg';
+import lightLogo from '@assets/svg/app-logo-light.svg';
 
 const RenderLogo: FC<{ classname?: string; logoClassname: string }> = ({
   classname = '',
@@ -14,9 +16,7 @@ const RenderLogo: FC<{ classname?: string; logoClassname: string }> = ({
     <Link to={TOURS} className={classname}>
       <img
         src={
-          theme === 'light'
-            ? '/src/assets/svg/app-logo-dark.svg'
-            : '/src/assets/svg/app-logo-light.svg'
+          theme === 'light' ? darkLogo : lightLogo
         }
         alt="Logo"
         className={`${logoClassname}`}

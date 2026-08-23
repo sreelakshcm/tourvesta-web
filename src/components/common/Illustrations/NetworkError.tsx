@@ -2,6 +2,8 @@ import { useAppSelector } from '@app/hooks';
 import { selectTheme } from '@features/UI/themeToggleSlice';
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
+import darkNetworkError from '@assets/svg/network-error-dark.svg';
+import lightNetworkError from '@assets/svg/network-error-light.svg';
 
 const NetworkError: FC = () => {
   const theme = useAppSelector(selectTheme);
@@ -13,7 +15,7 @@ const NetworkError: FC = () => {
         {/* Illustration */}
         <div className="flex justify-center">
           <img
-            src={`/src/assets/svg/network-error-${theme}.svg`}
+            src={theme === 'dark' ? darkNetworkError : lightNetworkError}
             alt="Network Error"
             className="h-96 w-96"
           />

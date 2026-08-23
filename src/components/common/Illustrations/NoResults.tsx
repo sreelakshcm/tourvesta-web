@@ -1,6 +1,8 @@
 import { useAppSelector } from '@app/hooks';
 import { selectTheme } from '@features/UI/themeToggleSlice';
 import { FC } from 'react';
+import darkNoResults from '@assets/svg/no-results-dark.svg';
+import lightNoResults from '@assets/svg/no-results-light.svg';
 
 const NoResults: FC = () => {
   const theme = useAppSelector(selectTheme);
@@ -13,7 +15,7 @@ const NoResults: FC = () => {
         {/* Illustration */}
         <div className="flex justify-center">
           <img
-            src={`/src/assets/svg/no-results-${theme}.svg`}
+            src={theme === 'dark' ? darkNoResults : lightNoResults}
             alt="Page Not Found"
             className="h-96 w-96"
           />

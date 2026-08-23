@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import notFoundIllustration from '@assets/svg/404-not-found.svg';
 
 const NotFoundPage: React.FC = () => {
   return (
@@ -12,7 +13,7 @@ const NotFoundPage: React.FC = () => {
         {/* Illustration */}
         <div className="flex justify-center">
           <img
-            src="/src/assets/svg/404-not-found.svg" // Replace with your SVG or illustration
+            src={notFoundIllustration}
             alt="Page Not Found"
             className="h-96 w-96"
           />
