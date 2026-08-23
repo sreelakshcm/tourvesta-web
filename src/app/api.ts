@@ -70,11 +70,16 @@ const baseQueryWithReauth: BaseQueryFn<
       }
     } else {
       api.dispatch(clearAlertErrorState());
+      const status = +errData?.data?.error?.statusCode || +errData.status;
+      const errorMessage =
+        status >= 500
+          ? 'Something went wrong. Please try again later.'
+          : errData?.data?.message || '';
       api.dispatch(
         setError({
           isError: true,
-          errorMessage: errData?.data?.message || '',
-          status: +errData?.data?.error?.statusCode || +errData.status,
+          errorMessage,
+          status,
         }),
       );
     }

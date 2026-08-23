@@ -40,7 +40,7 @@ const Navbar: FC = () => {
         onClick={isMobileAfterNavigateOnClick}
         className="text-sm font-semibold hover:text-primary"
       >
-        All Tours
+        Explore Tours
       </Link>
       <Link
         to={REVIEWS}

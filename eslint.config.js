@@ -59,12 +59,6 @@ export default [
           allowExpressions: true,
         },
       ],
-      'max-len': [
-        1,
-        {
-          code: 100,
-        },
-      ],
       semi: ['error', 'always'],
       quotes: ['error', 'single', { avoidEscape: true }],
       indent: ['error', 2, { SwitchCase: 1 }],

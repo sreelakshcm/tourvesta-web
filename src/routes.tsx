@@ -12,6 +12,9 @@ const ForgotPasswordPage = React.lazy(() => import('./pages/ForgotPassword'));
 const UpdatePasswordPage = React.lazy(() => import('@pages/UpdatePassword'));
 const NotFoundPage = React.lazy(() => import('@components/common/Illustrations/404NotFound'));
 const NetworkErrorPage = React.lazy(() => import('@components/common/Illustrations/NetworkError'));
+const RoleManagementPage = React.lazy(() => import('@pages/RoleManagement'));
+const RoleGuard = React.lazy(() => import('@components/common/RoleGuard'));
+const AboutUsPage = React.lazy(() => import('@pages/AboutUs'));
 
 export const routes: RouteObject[] = [
   {
@@ -41,6 +44,18 @@ export const routes: RouteObject[] = [
       {
         path: 'update-password',
         element: <UpdatePasswordPage />,
+      },
+      {
+        path: 'about',
+        element: <AboutUsPage />,
+      },
+      {
+        path: 'admin/roles',
+        element: (
+          <RoleGuard roles={['admin']}>
+            <RoleManagementPage />
+          </RoleGuard>
+        ),
       },
     ],
   },

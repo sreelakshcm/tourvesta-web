@@ -39,6 +39,10 @@ export type User = {
   password: string;
   active: boolean;
   photo?: string;
+  guideApplicationStatus?: 'none' | 'pending' | 'approved' | 'rejected';
+  guideApplicationMessage?: string;
+  guideApplicationSubmittedAt?: string;
+  roleChangedAt?: string;
 };
 
 export type CurrentUser = {

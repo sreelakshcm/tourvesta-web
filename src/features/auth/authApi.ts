@@ -12,7 +12,7 @@ import { setSuccess } from '@features/UI/themeToggleSlice';
 
 export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    signUp: builder.mutation<{ token: string }, SignUpPayload>({
+    signUp: builder.mutation<{ token: string }, SignUpPayload | FormData>({
       query: (payload) => ({
         url: `${USERS}/signup`,
         body: payload,

@@ -2,9 +2,15 @@ import React, { useState } from 'react';
 import Settings from '@features/users/settings/Settings';
 import { Cancel02Icon, Menu02Icon } from 'hugeicons-react';
 import Reviews from '@features/users/settings/Reviews';
+import { useAppSelector } from '@app/hooks';
+import { getUserData } from '@features/auth/authSlice';
 
 const UserSettingsPage: React.FC = () => {
-  const sections = ['settings', 'bookings', 'reviews', 'billing'];
+  const user = useAppSelector(getUserData);
+  const isRegularUser = user?.role === 'user';
+  const sections = isRegularUser
+    ? ['settings', 'bookings', 'reviews', 'billing']
+    : ['settings'];
   const [currentSection, setCurrentSection] = useState<
     'settings' | 'bookings' | 'reviews' | 'billing'
   >('settings');
@@ -79,9 +85,9 @@ const UserSettingsPage: React.FC = () => {
         {/* Main Content */}
         <div className="min-h-[calc(100vh-6.5rem)] flex-1 md:ml-0">
           {currentSection === 'settings' && <Settings />}
-          {currentSection === 'bookings' && renderBookingsSection()}
-          {currentSection === 'reviews' && <Reviews />}
-          {currentSection === 'billing' && renderBillingSection()}
+          {isRegularUser && currentSection === 'bookings' && renderBookingsSection()}
+          {isRegularUser && currentSection === 'reviews' && <Reviews />}
+          {isRegularUser && currentSection === 'billing' && renderBillingSection()}
         </div>
       </div>
     </div>
