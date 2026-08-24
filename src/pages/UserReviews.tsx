@@ -54,7 +54,7 @@ const UserReviews: FC = () => {
   const { data: myReviews = [] } = useGetMyReviewsQuery(undefined, {
     skip: !isCustomer,
   });
-  const { data: tours = [] } = useGetAllToursQuery('');
+  const { data: tours = [] } = useGetAllToursQuery('', { skip: !isCustomer });
   const [createReview, { isLoading: isCreating }] = useCreateReviewMutation();
   const [updateReview, { isLoading: isUpdating }] = useUpdateReviewMutation();
   const [deleteReview, { isLoading: isDeleting }] = useDeleteReviewMutation();

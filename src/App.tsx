@@ -1,35 +1,37 @@
 import { Suspense } from 'react';
 import {
   BrowserRouter as Router,
-  Route,
-  Routes,
   useLocation,
+  useRoutes,
 } from 'react-router-dom';
 import { routes } from './routes';
 import '@styles/loader.css';
 import Loader from '@components/UI/Loader';
 import { useAppSelector } from '@app/hooks';
-import {
-  getAlertErrors,
-  getErrors,
-  getSuccess,
-} from '@features/UI/themeToggleSlice';
 import Alert from '@components/UI/Alert';
 import UnauthorizedPage from '@components/common/Illustrations/UnAuthorizedPage';
 import { getToken } from '@features/auth/authSlice';
 
 const AppContent = (): JSX.Element => {
-  const { isSuccess, successMessage } = useAppSelector(getSuccess);
-  const { isError, errorMessage } = useAppSelector(getAlertErrors);
-  const globalError = useAppSelector(getErrors);
+  const isSuccess = useAppSelector((state) => state.theme.isSuccess);
+  const successMessage = useAppSelector((state) => state.theme.successMessage);
+  const isError = useAppSelector((state) => state.theme.alertType === 'error');
+  const errorMessage = useAppSelector((state) => state.theme.alertMessage);
+  const globalError = useAppSelector((state) => state.theme);
   const token = useAppSelector(getToken);
   const { pathname } = useLocation();
-  const isLoginPage = pathname === '/auth';
-  const isPublicTourPage = pathname === '/tours';
-  const requiresAuthentication = !isLoginPage && !isPublicTourPage;
+  const routeElements = useRoutes(routes);
+  const isPublicPage =
+    pathname === '/' ||
+    pathname === '/tours' ||
+    pathname.startsWith('/tours/detail/') ||
+    pathname === '/about' ||
+    pathname === '/auth' ||
+    pathname === '/forgot-password' ||
+    pathname === '/network-error';
   const isUnauthorized =
-    (!token && requiresAuthentication) ||
-    (globalError.isError && globalError.errorStatus === 401 && !isLoginPage);
+    (!token && !isPublicPage) ||
+    (globalError.isError && globalError.errorStatus === 401 && !isPublicPage);
 
   return (
     <>
@@ -39,20 +41,7 @@ const AppContent = (): JSX.Element => {
         {isUnauthorized ? (
           <UnauthorizedPage />
         ) : (
-          <Routes>
-            {routes.map((route, index) => (
-              <Route key={index} path={route.path} element={route.element}>
-                {route.children?.map((childRoute, childIndex) => (
-                  <Route
-                    key={childIndex}
-                    index={!!childRoute.index}
-                    path={childRoute.path}
-                    element={childRoute.element}
-                  />
-                ))}
-              </Route>
-            ))}
-          </Routes>
+          routeElements
         )}
       </Suspense>
     </>

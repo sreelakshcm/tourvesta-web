@@ -11,9 +11,12 @@ import { PRIMARY_COLOR } from '@constants/styles';
 import { FC } from 'react';
 import { Tour } from 'types/tourTypes';
 import { useNavigate } from 'react-router-dom';
+import { useAppSelector } from '@app/hooks';
+import { getToken } from '@features/auth/authSlice';
 
 const TourCard: FC<{ tours: Tour[] }> = ({ tours }) => {
   const navigate = useNavigate();
+  const token = useAppSelector(getToken);
 
   return (
     <div className="grid grid-cols-1 gap-8 p-6 md:grid-cols-2 lg:grid-cols-3">
@@ -87,6 +90,11 @@ transition-shadow hover:scale-105 hover:shadow-xl dark:bg-neutral-dark dark:hove
                 ${tour.price} <span className="text-sm">/ person</span>
               </span>
               <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  navigate(token ? `${TOURS}/detail/${tour._id}` : '/auth');
+                }}
                 className="rounded-lg bg-primary px-4 py-2 text-white shadow-md 
 transition-all duration-300 ease-in-out hover:bg-primary-hover
  focus:bg-primary-focus active:bg-primary-active"

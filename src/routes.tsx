@@ -15,6 +15,8 @@ const NetworkErrorPage = React.lazy(() => import('@components/common/Illustratio
 const RoleManagementPage = React.lazy(() => import('@pages/RoleManagement'));
 const RoleGuard = React.lazy(() => import('@components/common/RoleGuard'));
 const AboutUsPage = React.lazy(() => import('@pages/AboutUs'));
+const GuideDashboard = React.lazy(() => import('@pages/GuideDashboard'));
+const GuideRestrictedRoute = React.lazy(() => import('@components/common/GuideRestrictedRoute'));
 
 export const routes: RouteObject[] = [
   {
@@ -22,16 +24,25 @@ export const routes: RouteObject[] = [
     element: <UserLayout />,
     children: [
       {
-        index: true, // This renders when `/` is visited directly
-        element: <TourLandingPage />,
-      },
-      {
-        path: 'tours', // This renders when `/tours` is visited directly
-        element: <TourLandingPage />,
-      },
-      {
-        path: 'tours/detail/:id', // Nested route for tour details
-        element: <TourDetailPage />,
+        element: <GuideRestrictedRoute />,
+        children: [
+          {
+            index: true, // This renders when `/` is visited directly
+            element: <TourLandingPage />,
+          },
+          {
+            path: 'tours', // This renders when `/tours` is visited directly
+            element: <TourLandingPage />,
+          },
+          {
+            path: 'tours/detail/:id', // Nested route for tour details
+            element: <TourDetailPage />,
+          },
+          {
+            path: 'about',
+            element: <AboutUsPage />,
+          },
+        ],
       },
       {
         path: 'reviews',
@@ -42,12 +53,16 @@ export const routes: RouteObject[] = [
         element: <UserSettings />,
       },
       {
-        path: 'update-password',
-        element: <UpdatePasswordPage />,
+        path: 'guide',
+        element: (
+          <RoleGuard roles={['guide', 'lead-guide']}>
+            <GuideDashboard />
+          </RoleGuard>
+        ),
       },
       {
-        path: 'about',
-        element: <AboutUsPage />,
+        path: 'update-password',
+        element: <UpdatePasswordPage />,
       },
       {
         path: 'admin/roles',

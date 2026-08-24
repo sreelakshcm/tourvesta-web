@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   StarIcon,
   TimeQuarterPassIcon,
@@ -18,13 +18,21 @@ import TourReviews from '@features/tours/components/TourReviews';
 import TourMap from '@features/tours/components/TourMap';
 import ItineraryTimeline from '@features/tours/components/ItineraryTimeline';
 import TourHighlightItem from '@features/tours/components/TourHighlightItem';
-import { useAppDispatch } from '@app/hooks';
+import { useAppDispatch, useAppSelector } from '@app/hooks';
 import { setIsSearch, setSearchQuery } from '@features/UI/navbarSlice';
+import { getToken } from '@features/auth/authSlice';
+import { useCreateReservationMutation } from '@features/bookings/bookingApi';
+import { format } from 'date-fns';
 
 const TourDetailPage: React.FC = () => {
   const { id = '' } = useParams<{ id: string }>();
   const { data: tour, isLoading } = useGetTourByIdQuery(id);
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const token = useAppSelector(getToken);
+  const [createReservation, { isLoading: isCreatingReservation }] = useCreateReservationMutation();
+  const [paymentError, setPaymentError] = useState<string>();
+  const [selectedStartDate, setSelectedStartDate] = useState('');
 
   useEffect(() => {
     dispatch(setSearchQuery(''));
@@ -41,6 +49,25 @@ const TourDetailPage: React.FC = () => {
       <p className="text-center text-lg text-gray-500">Oops! Tour not found.</p>
     );
 
+  const reserveTour = async (): Promise<void> => {
+    if (!token) {
+      navigate('/auth');
+      return;
+    }
+    try {
+      setPaymentError(undefined);
+      if (!selectedStartDate) {
+        setPaymentError('Please select a departure date before reserving.');
+        return;
+      }
+      await createReservation({ tourId: tour._id, guests: 1, startDate: selectedStartDate }).unwrap();
+      navigate('/settings?section=bookings');
+    } catch (error) {
+      const apiError = error as { data?: { message?: string } };
+      setPaymentError(apiError.data?.message || 'Unable to reserve this tour. Please try again.');
+    }
+  };
+
   const {
     name,
     imageCover,
@@ -51,12 +78,14 @@ const TourDetailPage: React.FC = () => {
     startLocation,
     ratingsAverage,
     ratingsQuantity,
+    startDates,
     images,
     summary,
     description,
     locations,
     reviews,
   } = tour;
+  const upcomingStartDates = startDates.filter((date) => new Date(date).getTime() >= Date.now());
 
   return (
     <div className="mt-2 bg-gray-50 pb-3 dark:bg-backgroundDark dark:text-gray-100">
@@ -87,13 +116,44 @@ const TourDetailPage: React.FC = () => {
           <p className="mt-4 max-w-3xl animate-fadeIn text-lg leading-relaxed text-gray-300">
             {summary}
           </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-6">
-            <button
-              className="transform rounded-lg bg-primary px-8 py-3 text-lg font-semibold
- text-white shadow-lg transition-transform hover:scale-110 hover:bg-primary-hover hover:shadow-2xl"
-            >
-              Book Now
-            </button>
+          <div className="mx-auto mt-8 max-w-2xl rounded-2xl border border-white/20 bg-white/95 p-4 text-left text-fontLight shadow-2xl backdrop-blur-sm sm:p-5">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+              <label className="block flex-1 text-sm font-bold">
+                <span className="text-primary">1. Choose your departure</span>
+                <select
+                  value={selectedStartDate}
+                  onChange={(event) => {
+                    setSelectedStartDate(event.target.value);
+                    setPaymentError(undefined);
+                  }}
+                  disabled={upcomingStartDates.length === 0}
+                  className="mt-2 block w-full rounded-xl border border-gray-200 bg-white p-3.5 font-medium text-fontLight outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:bg-gray-100"
+                >
+                  <option value="">{upcomingStartDates.length ? 'Select a date' : 'No upcoming departures'}</option>
+                  {upcomingStartDates.map((date) => (
+                    <option key={date} value={date}>{format(new Date(date), 'EEEE, MMMM d, yyyy')}</option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="button"
+                onClick={reserveTour}
+                disabled={isCreatingReservation || upcomingStartDates.length === 0}
+                className="min-h-14 rounded-xl bg-primary px-6 py-3.5 text-base font-bold text-white shadow-lg transition hover:bg-primary-hover hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-400 sm:min-w-52"
+              >
+                {isCreatingReservation ? 'Reserving your spot…' : 'Reserve your spot'}
+              </button>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 border-t border-gray-100 pt-3 text-xs font-medium text-gray-600">
+              <span>${price} per traveller</span>
+              <span>✓ No payment today</span>
+              <span>✓ Free cancellation until 24 hours before departure</span>
+            </div>
+            {paymentError && (
+              <p role="alert" className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
+                {paymentError}
+              </p>
+            )}
           </div>
         </div>
       </section>
@@ -128,9 +188,15 @@ const TourDetailPage: React.FC = () => {
                 label={`${ratingsAverage} (${ratingsQuantity} reviews)`}
               />
             </ul>
-            <button className="mt-6 w-full rounded-lg bg-primary px-4 py-2 text-white shadow-lg">
-              Reserve Your Spot
+            <button
+              type="button"
+              onClick={reserveTour}
+              disabled={isCreatingReservation || upcomingStartDates.length === 0}
+              className="mt-6 w-full rounded-lg bg-primary px-4 py-2 text-white shadow-lg"
+            >
+              {isCreatingReservation ? 'Creating reservation…' : 'Reserve your spot'}
             </button>
+            {upcomingStartDates.length === 0 && <p className="mt-3 text-sm text-amber-700 dark:text-amber-300">This tour does not currently have an upcoming departure.</p>}
           </aside>
           <main className="space-y-12 lg:col-span-2">
             <section>

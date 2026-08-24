@@ -2,18 +2,35 @@ import { useAppDispatch, useAppSelector } from '@app/hooks';
 import { AUTH } from '@constants/services';
 import { clearErrorState, getErrors } from '@features/UI/themeToggleSlice';
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import invalidIllustration from '@assets/svg/invalid.svg';
 
 const UnauthorizedPage: React.FC = () => {
   const dispatch = useAppDispatch();
   const globalError = useAppSelector(getErrors);
+  const navigate = useNavigate();
+
+  const goBack = (): void => {
+    dispatch(clearErrorState());
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+    navigate('/tours', { replace: true });
+  };
 
   return (
     <div
-      className="flex min-h-screen w-full items-center justify-center overflow-hidden
+      className="relative flex min-h-screen w-full items-center justify-center overflow-hidden
         bg-backgroundLight px-4 py-8 text-center text-fontLight dark:bg-backgroundDark sm:px-6"
     >
+      <button
+        type="button"
+        onClick={goBack}
+        className="absolute left-4 top-4 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-primary hover:text-primary dark:border-gray-600 dark:bg-neutral-dark dark:text-gray-200 sm:left-6 sm:top-6"
+      >
+        ← Go back
+      </button>
       <div className="z-10 w-full max-w-2xl space-y-6 sm:space-y-8">
         {/* Illustration */}
         <div className="flex justify-center">

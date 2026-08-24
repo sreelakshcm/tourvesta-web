@@ -1,4 +1,4 @@
-export const tags = ['User', 'Tours', 'Reviews', 'Auth'];
+export const tags = ['User', 'Tours', 'Reviews', 'Auth', 'Bookings'];
 
 const localServiceUrl = 'http://localhost:5001/api/v1';
 const deployedServiceUrl = 'https://tourvesta-services.vercel.app/api/v1';
@@ -19,3 +19,5 @@ export const REVIEWS = '/reviews';
 export const LOGIN = '/login';
 
 export const AUTH = '/auth';
+
+export const BOOKINGS = '/bookings';

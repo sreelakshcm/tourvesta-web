@@ -13,20 +13,23 @@ const NavigationLinks: FC<NavigationLinksProps> = ({ closeMobileMenu }) => {
 
   return (
     <>
-      <Link
+      {user?.role !== 'guide' && user?.role !== 'lead-guide' && <Link
         to="/"
         onClick={closeMobileMenu}
         className="text-sm font-semibold hover:text-primary"
       >
         Explore Tours
-      </Link>
-      <Link
+      </Link>}
+      {user?.role !== 'guide' && user?.role !== 'lead-guide' && <Link
         to={REVIEWS}
         onClick={closeMobileMenu}
         className="text-sm font-semibold hover:text-primary"
       >
         Reviews
-      </Link>
+      </Link>}
+      {(user?.role === 'guide' || user?.role === 'lead-guide') && (
+        <Link to="/guide" onClick={closeMobileMenu} className="text-sm font-semibold hover:text-primary">My sessions</Link>
+      )}
       <Link
         to="/about"
         onClick={closeMobileMenu}

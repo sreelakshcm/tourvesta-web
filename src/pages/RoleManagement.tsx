@@ -6,6 +6,10 @@ import {
   useGetGuideApplicationsQuery,
   useUpdateUserRoleMutation,
 } from '@features/users/userApi';
+import {
+  useGetRejectionRequestsQuery,
+  useReviewRejectionRequestMutation,
+} from '@features/bookings/bookingApi';
 import { FormEvent, useState } from 'react';
 import { User } from 'types/tourTypes';
 
@@ -16,6 +20,8 @@ const RoleManagement = (): JSX.Element => {
   const { data: applications = [], isLoading, error } = useGetGuideApplicationsQuery();
   const [updateRole, { isLoading: isUpdating }] = useUpdateUserRoleMutation();
   const [createInvitation, { isLoading: isInviting }] = useCreateRoleInvitationMutation();
+  const { data: rejectionRequests = [], isLoading: isLoadingRequests } = useGetRejectionRequestsQuery();
+  const [reviewRequest, { isLoading: isReviewingRequest }] = useReviewRejectionRequestMutation();
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<InvitableRole>('guide');
   const [isRoleMenuOpen, setIsRoleMenuOpen] = useState(false);
@@ -55,6 +61,17 @@ const RoleManagement = (): JSX.Element => {
     } catch (requestError) {
       const apiError = requestError as { data?: { message?: string } };
       setMessage(apiError.data?.message || 'Unable to create the invitation.');
+    }
+  };
+
+  const decideSessionRequest = async (id: string, decision: 'approved' | 'declined'): Promise<void> => {
+    try {
+      setMessage(undefined);
+      await reviewRequest({ id, decision }).unwrap();
+      dispatch(setSuccess({ isSuccess: true, successMessage: decision === 'approved' ? 'The guide was released and the guest was reassigned where possible.' : 'The guide request was declined.' }));
+    } catch (requestError) {
+      const apiError = requestError as { data?: { message?: string } };
+      setMessage(apiError.data?.message || 'Unable to review this session request.');
     }
   };
 
@@ -122,6 +139,26 @@ const RoleManagement = (): JSX.Element => {
             <a className="break-all text-primary underline" href={invitationUrl}>{invitationUrl}</a>
           </div>
         )}
+      </section>
+
+      <section className="rounded-lg bg-white p-6 shadow-lg dark:bg-neutral-layout">
+        <h2 className="text-xl font-bold text-primary">Guide session rejection requests</h2>
+        <p className="mt-2 text-sm">Approving a request releases the guide, assigns another eligible guide where available, and only cancels when no replacement exists.</p>
+        {isLoadingRequests ? <p className="mt-4">Loading session requests…</p> : null}
+        {!isLoadingRequests && rejectionRequests.length === 0 ? <p className="mt-4 text-sm">There are no pending session requests.</p> : null}
+        <div className="mt-4 space-y-4">
+          {rejectionRequests.map((booking) => (
+            <article key={booking._id} className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+              <p className="font-semibold">{booking.tour.name}</p>
+              <p className="mt-1 text-sm text-gray-500">Guide: {booking.assignedGuide.name} · Guest: {booking.user?.name || 'Guest'}</p>
+              <p className="mt-3 rounded-md bg-gray-100 p-3 text-sm dark:bg-neutral-dark">{booking.guideRejectionRequest?.reason}</p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <ButtonComponent type="button" disabled={isReviewingRequest} onClick={() => decideSessionRequest(booking._id, 'approved')} className="bg-primary text-white">Approve & reassign</ButtonComponent>
+                <ButtonComponent type="button" disabled={isReviewingRequest} onClick={() => decideSessionRequest(booking._id, 'declined')} variant="outline">Keep assignment</ButtonComponent>
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
 
       <section className="rounded-lg bg-white p-6 shadow-lg dark:bg-neutral-layout">
