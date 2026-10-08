@@ -145,7 +145,7 @@ const TourDetailPage: React.FC = () => {
               </button>
             </div>
             <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 border-t border-gray-100 pt-3 text-xs font-medium text-gray-600">
-              <span>${price} per traveller</span>
+              <span>₹{price} per traveller</span>
               <span>✓ No payment today</span>
               <span>✓ Free cancellation until 24 hours before departure</span>
             </div>
