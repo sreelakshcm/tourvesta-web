@@ -217,7 +217,7 @@ shadow-md transition-shadow hover:shadow-lg dark:bg-neutral-dark"
                   <div className="ml-4">
                     <h3 className="text-lg font-semibold">Price</h3>
                     <p className="capitalize text-gray-600 dark:text-gray-300">
-                      ${price}
+                      ₹{price}
                     </p>
                   </div>
                 </div>
