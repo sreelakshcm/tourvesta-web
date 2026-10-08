@@ -87,7 +87,7 @@ transition-shadow hover:scale-105 hover:shadow-xl dark:bg-neutral-dark dark:hove
             {/* Pricing & Book Button */}
             <div className="mt-4 flex items-center justify-between">
               <span className="text-lg font-semibold text-secondary">
-                ${tour.price} <span className="text-sm">/ person</span>
+                 ₹{tour.price} <span className="text-sm">/ person</span>
               </span>
               <button
                 type="button"
