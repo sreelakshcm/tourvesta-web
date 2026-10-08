@@ -52,11 +52,11 @@ const TourFilters: FC<TourFilterProps> = ({
 
   const priceRangeOptions = [
     { label: 'All Price Ranges', value: '' },
-    { label: '$100 - $200', value: '100,200' },
-    { label: '$200 - $400', value: '200,400' },
-    { label: '$400 - $600', value: '400,600' },
-    { label: '$600 - $800', value: '600,800' },
-    { label: '$800 - $1000', value: '800,1000' },
+    { label: '₹100 - ₹200', value: '100,200' },
+    { label: '₹200 - ₹400', value: '200,400' },
+    { label: '₹400 - ₹600', value: '400,600' },
+    { label: '₹600 - ₹800', value: '600,800' },
+    { label: '₹800 - ₹1000', value: '800,1000' },
   ];
 
   return (
