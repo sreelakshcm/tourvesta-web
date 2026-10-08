@@ -106,7 +106,7 @@ const UserSettingsPage: React.FC = () => {
               </div>
               <div className="mt-3 grid gap-1 text-sm sm:grid-cols-3">
                 <p><span className="text-gray-500">Guests:</span> {booking.guests}</p>
-                <p><span className="text-gray-500">Total:</span> ${booking.price}</p>
+                <p><span className="text-gray-500">Total:</span> ₹{booking.price}</p>
                 <p><span className="text-gray-500">Booked:</span> {new Date(booking.bookedAt).toLocaleDateString()}</p>
                 <p><span className="text-gray-500">Departure:</span> {new Date(booking.startDate).toLocaleDateString()}</p>
               </div>
